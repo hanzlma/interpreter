@@ -1,4 +1,5 @@
 from lexer import Lexer
+from errors import MHscr_ValueError
 class CLIRunner:
     """
     Runner for in-CLI interpreter
@@ -11,8 +12,11 @@ class CLIRunner:
         try:
             inp = input('> ')
             while inp != 'exit':
-                expression = lexer.Lex(inp)(inp, True)
-                expression.execute()
+                try:
+                    expression = lexer.Lex(inp)(inp, True)
+                    expression.execute()
+                except MHscr_ValueError as err:
+                    print(f'> Code "{inp}" could not have been executed because of a ValueError!\nError:{err}')
                 inp = input('> ')
         except KeyboardInterrupt:
             pass

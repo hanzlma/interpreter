@@ -6,7 +6,7 @@ class Lexer:
     lexFunction: str
     def __init__(self, parent) -> None:
         from runner_cli import CLIRunner
-        self.cli = True if type(parent) == CLIRunner else False #doplnit WholeFile typem
+        self.cli = True if isinstance(parent, CLIRunner) else False #doplnit WholeFile typem
         self.lexFunction = "Lex_CLI" if self.cli else "Lex_WholeFile"
 
     from expressions import PrintExp
@@ -20,4 +20,4 @@ class Lexer:
         from keywords import KeywordsDict
         expression = KeywordsDict(self).GetExpression(command=command)
         return expression
-    
+

@@ -1,3 +1,6 @@
+from operators import GetOperatorsFromText, SplitByOperators
+from datatypes import GetDatatypeDynamically
+from dynamic_operation import DynamicCalculator
 class PrintExp:
     """
     Print expression.
@@ -10,14 +13,26 @@ class PrintExp:
     cli: bool
     inp: str
     argument: str
-    arguments: list#[] TBD
+    arguments: list
+    printvalue: str
     def __init__(self, inp: str, cli: bool) -> None:
         self.inp = inp
         self.cli = cli
     
     def prepareArguments(self) -> None:
-        argument: str = self.inp.replace('print ', '')
-        if argument.count('"') == 0:
+        self.argument = self.inp.replace('print ', '')
+        self.arguments = SplitByOperators(self.argument)
+        
+        if len(self.arguments) == 1:
+            self.printvalue = str(GetDatatypeDynamically(self.argument).value)
+        else:
+            operators = GetOperatorsFromText(self.argument)
+            args = []
+            for x in self.arguments:
+                args.append(GetDatatypeDynamically(x))
+            self.arguments = args
+            self.printvalue = str(DynamicCalculator().CalculateDynamicOperations(self.arguments, operators).value)
+        """ if argument.count('"') == 0:
             pass
         elif argument.count('"') == 2:
             self.argument = argument.replace('"', '')
@@ -29,11 +44,11 @@ class PrintExp:
             phrases = argument.split('+')
             self.argument = ''
             for phrase in phrases:
-                self.argument += phrase.strip().replace('"','')
+                self.argument += phrase.strip().replace('"','') """
             
     def execute(self) -> None:
         self.prepareArguments()
-        print(f"{'> ' if self.cli else ''}{self.argument}")
+        print(f"{'> ' if self.cli else ''}{self.printvalue}")
     
         
 class InputExp:
