@@ -1,51 +1,116 @@
 from datatypes import String, Int, Float, Bool
-from errors import MHscr_ValueError
+from errors import MHscr_ValueError, MHscr_TypeError, MHscr_OperatorError
 from operators import operators
 from helper import DynamicListContainsDatatype
 
 class DynamicCalculator:
-    """Dynamic Calculator."""
-    value: String | Int | Float | Bool
-    def CalculateDynamicOperations(self, arguments: list[String | Int | Float | Bool], ops: list[str]) -> String | Int | Float | Bool:
+    """Dynamic Calculator static class"""
+
+    def CalculateDynamicOperations(arguments: list[String | Int | Float | Bool], ops: list[str]) -> String | Int | Float | Bool:
         if isinstance(arguments[0], String) and (ops.count(operators['minus']) > 0 or ops.count(operators['multiply']) > 0 or ops.count(operators['divide']) > 0 ):
-            raise MHscr_ValueError("Strings can only be summed")
+            raise MHscr_TypeError("Strings can only be summed")
         if (not isinstance(arguments[0], String)) and DynamicListContainsDatatype(arguments, String):
-            raise MHscr_ValueError('String can only be used with other datatypes if it is the first type in the operation')
-    
+            raise MHscr_TypeError('String can only be used with other datatypes if it is the first type in the operation')
+        value: String | Int | Float | Bool
+        (arguments, ops) = DynamicCalculator.ResolveOperatorPrecedences(arguments, ops)
         for i in range(len(arguments)):
             if i == 0:
-                self.value = arguments[0]
+                value = arguments[0]
             else: 
-                match ops[i-1]:
+                value = DynamicCalculator.Operation(value, arguments[i], ops[i-1])
+        
+        return value
+    
+    def ResolveOperatorPrecedences(arguments: list[String | Int | Float | Bool], ops: list[str]) -> tuple[list[String | Int | Float | Bool] , list[str]]:
+        args: list[String | Int | Float | Bool] = arguments
+        op: list[str] = ops
+        
+        while op.count('*') > 0:
+            index: int = op.index('*')
+            args[index] = DynamicCalculator.Multiplication(args[index], args[index+1])
+            args.pop(index+1)
+            op.pop(index)
+
+        while op.count('/') > 0:
+            index: int = op.index('/')
+            args[index] = DynamicCalculator.Division(args[index], args[index+1])
+            args.pop(index+1)
+            op.pop(index)
+
+        return (args, op)
+        
+    def Operation(left: String | Int | Float | Bool, right: String | Int | Float | Bool, operator: str) -> String | Int | Float | Bool:
+        match operator:
                     case '+':
-                        self.Sum(arguments[i])
-                        pass
+                        return DynamicCalculator.Sum(left, right)
                     case '-':
-                        pass
+                        return DynamicCalculator.Substraction(left, right)
                     case '*':
-                        pass
+                        return DynamicCalculator.Multiplication(left, right)
                     case '/':
-                        pass
+                        return DynamicCalculator.Division(left, right)
                     case '&&':
                         pass
                     case '||':
                         pass
                 
                     case _:
-                        raise MHscr_ValueError(f"Unsupported operator {ops[i-1]}")
-        
-        return self.value
+                        raise MHscr_OperatorError(f"Unsupported operator {operator}")
     
-    def Sum(self, argument: String | Int | Float):
-        T: type = type(self.value)
-        type_argument: type = type(argument)
-        if type_argument is T:
+    def Sum(left: String | Int | Float | Bool, right: String | Int | Float | Bool) -> String | Int | Float | Bool:
+        T: type = type(left)
+        type_argument: type = type(right)
+        if type_argument is T and T is not Bool and T is not String:
             
-            self.value = T(self.value.value + argument.value)
+            return T(left.value + right.value)
         elif T is String:
-            self.value = T(f"'{self.value.value + str(argument.value)}'")
+            return T(f"'{str(left.value) + str(right.value)}'")
         elif (T is Int and type_argument is Float) or (T is Float and type_argument is Int):
-            self.value = Float(self.value.value + argument.value)
+            return Float(left.value + right.value)
         else:
-            raise MHscr_ValueError(f"Unsupported operation: {self.value}<{T}> + {argument}<{type_argument}>")
+            raise MHscr_ValueError(f"Unsupported operation: {left} {T} + {right} {type_argument}")
             
+    def Substraction(left: String | Int | Float | Bool, right: String | Int | Float | Bool) -> String | Int | Float | Bool:
+        T: type = type(left)
+        type_argument: type = type(right)
+        
+        if T is Bool or T is String:
+            raise MHscr_TypeError(f"Type {T} cannot be used in a substracting operation.")
+        elif type_argument is Bool or type_argument is String:
+            raise MHscr_TypeError(f"Type {type_argument} cannot be used in a substracting operation.")
+        elif T is Float or type_argument is Float:
+            return Float(left.value - right.value)
+        elif T is Int and T is type_argument:
+            return Int(left.value - right.value)
+        else:
+            raise MHscr_ValueError(f"Unsupported operation: {left} {T} - {right} {type_argument}")
+        
+    def Multiplication(left: String | Int | Float | Bool, right: String | Int | Float | Bool) -> String | Int | Float | Bool:
+        T: type = type(left)
+        type_argument: type = type(right)
+        
+        if T is Bool or T is String:
+            raise MHscr_TypeError(f"Type {T} cannot be used in a multiplicating operation.")
+        elif type_argument is Bool or type_argument is String:
+            raise MHscr_TypeError(f"Type {type_argument} cannot be used in a multiplicating operation.")
+        elif T is Float or type_argument is Float:
+            return Float(left.value * right.value)
+        elif T is Int and T is type_argument:
+            return Int(left.value * right.value)
+        else:
+            raise MHscr_ValueError(f"Unsupported operation: {left} {T} * {right} {type_argument}")
+        
+    def Division(left: String | Int | Float | Bool, right: String | Int | Float | Bool) -> String | Int | Float | Bool:
+        T: type = type(left)
+        type_argument: type = type(right)
+        
+        if T is Bool or T is String:
+            raise MHscr_TypeError(f"Type {T} cannot be used in a divising operation.")
+        elif type_argument is Bool or type_argument is String:
+            raise MHscr_TypeError(f"Type {type_argument} cannot be used in a divising operation.")
+        elif T is Float or type_argument is Float:
+            return Float(left.value / right.value)
+        elif T is Int and T is type_argument:
+            return Int(left.value / right.value)
+        else:
+            raise MHscr_ValueError(f"Unsupported operation: {left} {T} / {right} {type_argument}")

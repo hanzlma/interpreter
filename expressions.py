@@ -31,7 +31,7 @@ class PrintExp:
             for x in self.arguments:
                 args.append(GetDatatypeDynamically(x))
             self.arguments = args
-            self.printvalue = str(DynamicCalculator().CalculateDynamicOperations(self.arguments, operators).value)
+            self.printvalue = str(DynamicCalculator.CalculateDynamicOperations(self.arguments, operators).value)
         """ if argument.count('"') == 0:
             pass
         elif argument.count('"') == 2:

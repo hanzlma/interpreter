@@ -16,6 +16,8 @@ class String:
         else:
             raise ValueError(f"Value {val} cannot be converted to string")
 
+    def __str__(self) -> str:
+        return self.value
 class Int:
     """
     Integer class for MHscript.
@@ -28,6 +30,9 @@ class Int:
     
     def __init__(self, val: str) -> None:
         self.value = int(val) # error handling in managing functions (if this function throws, the value is not an integer)
+    
+    def __str__(self) -> str:
+        return str(self.value)
         
 class Float:
     """
@@ -48,6 +53,8 @@ class Float:
             if self.value.is_integer() and val.count('.') != 1:
                 raise ValueError
 
+    def __str__(self) -> str:
+        return str(self.value)
 class Bool:
     """
     Boolean class for MHscript.
@@ -62,7 +69,9 @@ class Bool:
         if _dynamically_called and val != 'True' and val!= 'False': 
             raise MHscr_ValueError("Dynamically typed value can only be turned to Bool if it is True or False")
         self.value = bool(val)
-        
+    
+    def __str__(self) -> str:
+        return str(self.value)
 class Let:
     """
     Dynamic type class for MHscript.
@@ -73,6 +82,9 @@ class Let:
     """
     def __init__(self, val:str) -> None:
         self.value = GetDatatypeDynamically(val)
+    
+    def __str__(self) -> str:
+        return str(self.value)
 
 
 def GetDatatypeDynamically(val:str) -> String | Int | Bool | Float:
