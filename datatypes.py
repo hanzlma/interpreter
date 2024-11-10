@@ -65,10 +65,12 @@ class Bool:
     """
     value: bool
     
-    def __init__(self, val:str, _dynamically_called: bool = False) -> None:
-        if _dynamically_called and val != 'True' and val!= 'False': 
+    def __init__(self, val:str|bool, _dynamically_called: bool = False) -> None:
+        if isinstance(val, bool):
+            pass
+        elif _dynamically_called and val != 'True' and val!= 'False': 
             raise MHscr_ValueError("Dynamically typed value can only be turned to Bool if it is True or False")
-        self.value = bool(val)
+        self.value = bool(val) if val != 'False' else False
     
     def __str__(self) -> str:
         return str(self.value)

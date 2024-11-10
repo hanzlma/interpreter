@@ -1,3 +1,5 @@
+import re
+
 from datatypes import String, Int, Float, Bool
 from errors import MHscr_ValueError, MHscr_TypeError, MHscr_OperatorError
 from operators import operators
@@ -6,13 +8,16 @@ from helper import DynamicListContainsDatatype
 class DynamicCalculator:
     """Dynamic Calculator static class"""
 
-    def CalculateDynamicOperations(arguments: list[String | Int | Float | Bool], ops: list[str]) -> String | Int | Float | Bool:
+    def CalculateDynamicOperations(arguments: list[String | Int | Float | Bool], ops: list[str], _recursive: bool = False) -> String | Int | Float | Bool:
         if isinstance(arguments[0], String) and (ops.count(operators['minus']) > 0 or ops.count(operators['multiply']) > 0 or ops.count(operators['divide']) > 0 ):
             raise MHscr_TypeError("Strings can only be summed")
         if (not isinstance(arguments[0], String)) and DynamicListContainsDatatype(arguments, String):
             raise MHscr_TypeError('String can only be used with other datatypes if it is the first type in the operation')
         value: String | Int | Float | Bool
-        (arguments, ops) = DynamicCalculator.ResolveOperatorPrecedences(arguments, ops)
+        (arguments, ops) = DynamicCalculator.ResolveNumericalOperatorPrecedences(arguments, ops)
+        if not _recursive:
+            (arguments, ops) = DynamicCalculator.ResolveLogicalOperatorPrecedences(arguments, ops)
+        
         for i in range(len(arguments)):
             if i == 0:
                 value = arguments[0]
@@ -21,7 +26,7 @@ class DynamicCalculator:
         
         return value
     
-    def ResolveOperatorPrecedences(arguments: list[String | Int | Float | Bool], ops: list[str]) -> tuple[list[String | Int | Float | Bool] , list[str]]:
+    def ResolveNumericalOperatorPrecedences(arguments: list[String | Int | Float | Bool], ops: list[str]) -> tuple[list[String | Int | Float | Bool] , list[str]]:
         args: list[String | Int | Float | Bool] = arguments
         op: list[str] = ops
         
@@ -38,7 +43,28 @@ class DynamicCalculator:
             op.pop(index)
 
         return (args, op)
-        
+
+    def ResolveLogicalOperatorPrecedences(arguments: list[String | Int | Float | Bool], ops: list[str]) -> tuple[list[String | Int | Float | Bool] , list[str]]:
+        if len(re.findall('\|\||&&', str(ops))) < 1:
+            return (arguments, ops)
+        logicalOperators: list[tuple[int, str]] = []
+        for i in range(0, len(arguments) - 1):
+            if re.search('^\|\||&&$', ops[i]):
+                logicalOperators.append((i, ops[i]))
+        outputArguments: list[String | Int | Float | Bool] = []
+        outputOperators: list[str] = []
+
+        for i in range(len(logicalOperators)):
+            if i == 0:
+                outputArguments.append(DynamicCalculator.CalculateDynamicOperations(arguments[:logicalOperators[i][0] + 1], ops[:logicalOperators[i][0]], True))
+            else:
+                outputArguments.append(DynamicCalculator.CalculateDynamicOperations(arguments[logicalOperators[i-1][0] + 1:logicalOperators[i][0] + 1], ops[logicalOperators[i-1][0] + 1:logicalOperators[i][0]], True))
+            outputOperators.append(logicalOperators[i][1])
+            if i == len(logicalOperators) - 1:
+                outputArguments.append(DynamicCalculator.CalculateDynamicOperations(arguments[logicalOperators[i][0] + 1:], ops[logicalOperators[i][0] + 1:], True))
+
+        return(outputArguments, outputOperators)
+
     def Operation(left: String | Int | Float | Bool, right: String | Int | Float | Bool, operator: str) -> String | Int | Float | Bool:
         match operator:
                     case '+':
@@ -50,9 +76,9 @@ class DynamicCalculator:
                     case '/':
                         return DynamicCalculator.Division(left, right)
                     case '&&':
-                        pass
+                        return DynamicCalculator.LogicalAnd(left, right)
                     case '||':
-                        pass
+                        return DynamicCalculator.LogicalOr(left, right)
                 
                     case _:
                         raise MHscr_OperatorError(f"Unsupported operator {operator}")
@@ -114,3 +140,15 @@ class DynamicCalculator:
             return Int(left.value / right.value)
         else:
             raise MHscr_ValueError(f"Unsupported operation: {left} {T} / {right} {type_argument}")
+    
+    def LogicalAnd(left: String | Int | Float | Bool, right: String | Int | Float | Bool) -> Bool:
+        try:
+            return Bool(bool(left.value and right.value))
+        except:  # noqa: E722
+            raise MHscr_ValueError(f"Unsupported operation: {left} {type(left)} && {right} {type(right)}")
+    
+    def LogicalOr(left: String | Int | Float | Bool, right: String | Int | Float | Bool) -> Bool:
+        try:
+            return Bool(bool(left.value or right.value))
+        except:  # noqa: E722
+            raise MHscr_ValueError(f"Unsupported operation: {left} {type(left)} || {right} {type(right)}")
