@@ -23,5 +23,4 @@ def GetOperatorsFromText(string: str) -> list[str]:
     output: list[str] = []
     for occurency in list(operatorOccurencies.values()):
         output.append(occurency)
-    print(operatorOccurencies)
     return output
