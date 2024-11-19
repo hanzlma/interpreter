@@ -1,6 +1,7 @@
 import re
 
-from datatypes import String, Int, Float, Bool
+from datatypes import String, Int, Float, Bool, Let
+
 from errors import MHscr_ValueError, MHscr_TypeError, MHscr_OperatorError
 from operators import operators
 from helper import DynamicListContainsDatatype
@@ -8,10 +9,13 @@ from helper import DynamicListContainsDatatype
 class DynamicCalculator:
     """Dynamic Calculator static class"""
 
-    def CalculateDynamicOperations(arguments: list[String | Int | Float | Bool], ops: list[str], _recursive: bool = False) -> String | Int | Float | Bool:
+    def CalculateDynamicOperations(arguments: list[String | Int | Float | Bool | Let], ops: list[str], _recursive: bool = False) -> String | Int | Float | Bool:
+        from datatypes import GetDatatypeDynamically
+        for i in range(len(arguments)):
+            arguments[i] = GetDatatypeDynamically(str(arguments[i])) if isinstance(arguments[i], Let) else arguments[i]
         if isinstance(arguments[0], String) and (ops.count(operators['minus']) > 0 or ops.count(operators['multiply']) > 0 or ops.count(operators['divide']) > 0 ):
             raise MHscr_TypeError("Strings can only be summed")
-        if (not isinstance(arguments[0], String)) and DynamicListContainsDatatype(arguments, String):
+        if (not isinstance(arguments[0], (String, Let))) and DynamicListContainsDatatype(arguments, String):
             raise MHscr_TypeError('String can only be used with other datatypes if it is the first type in the operation')
         value: String | Int | Float | Bool
         (arguments, ops) = DynamicCalculator.ResolveNumericalOperatorPrecedences(arguments, ops)
@@ -87,7 +91,6 @@ class DynamicCalculator:
         T: type = type(left)
         type_argument: type = type(right)
         if type_argument is T and T is not Bool and T is not String:
-            
             return T(left.value + right.value)
         elif T is String:
             return T(f"'{str(left.value) + str(right.value)}'")
