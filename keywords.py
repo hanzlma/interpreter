@@ -1,4 +1,5 @@
 from errors import MHscr_KeywordError
+from helper import getRunnerInstance
 class KeywordsDict:
     """
     Translates keyword into class reference.
@@ -18,4 +19,4 @@ class KeywordsDict:
         try:
             return self.dictionary[command]
         except KeyError as err:
-            raise MHscr_KeywordError(f"Unknown keyword {err}")
+            raise MHscr_KeywordError(f"Unknown keyword {err}" if command not in getRunnerInstance().variables.keys() else f"Cannot change value of an initialized constant {command}")

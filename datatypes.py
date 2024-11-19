@@ -102,14 +102,14 @@ def GetDatatypeDynamically(val:str) -> String | Int | Bool | Float:
         return runner.variables[val].var
     try:
         return String(val)
-    except MHscr_ValueError:
+    except (MHscr_ValueError , ValueError , IndexError):
         pass
     try:
         return Float(val)
-    except MHscr_ValueError:
+    except (MHscr_ValueError , ValueError):
         pass
-    try:
+    #try:
         return Int(val)
-    except MHscr_ValueError:
-        pass
+    #except (MHscr_ValueError , ValueError):
+       # pass
     return Bool(val, _dynamically_called=True)

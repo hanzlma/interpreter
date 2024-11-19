@@ -4,7 +4,7 @@ from datatypes import GetDatatypeDynamically, String, Float, Int, Let, Bool
 from variable import Variable
 from dynamic_operation import DynamicCalculator
 from helper import getRunnerInstance
-from errors import MHscr_OperatorError, MHscr_ValueError, MHscr_TypeError
+from errors import MHscr_OperatorError, MHscr_ValueError, MHscr_TypeError, MHscr_KeywordError
 
 def PrepareValue(argument: str, arguments: list[str]):
     if len(arguments) == 1:
@@ -114,7 +114,10 @@ class VariableExp:
         }
         if self.const:
             dictionary.pop('let')
-        self.datatype = dictionary[datatypeName]
+        try:
+            self.datatype = dictionary[datatypeName]
+        except KeyError:
+            raise MHscr_KeywordError(f"Datatype {datatypeName} is not a valid datatype for a {'constant ' if self.const else ''}variable.")
         
 class ConstantVariableExp:
     
@@ -153,8 +156,8 @@ class VariableAssignmentExp:
             self.var = Let(self.var)
         
         runner.variables[self.name] = Variable(self.name, runner.variables[self.name].datatype, self.var, False)
-        
-    
+
+
     def prepareArguments(self) -> None:
         parts = self.inp.split(' ')
         self.name = parts[0]
