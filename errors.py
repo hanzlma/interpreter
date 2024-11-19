@@ -16,3 +16,7 @@ class MHscr_TypeError(MHscr_Error):
 class MHscr_OperatorError(MHscr_Error):
     """Operator error: Raised in situations when the operator is the reason for the Exception."""
     pass
+
+class MHscr_KeywordError(MHscr_Error):
+    """Keyword error: Raised in situations when the called keyword creates an Exception."""
+    pass

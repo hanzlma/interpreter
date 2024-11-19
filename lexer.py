@@ -1,3 +1,4 @@
+from helper import getRunnerInstance
 class Lexer:
     """
     Lexer class of MHscript interpreter.
@@ -9,15 +10,15 @@ class Lexer:
         self.cli = True if isinstance(parent, CLIRunner) else False #doplnit WholeFile typem
         self.lexFunction = "Lex_CLI" if self.cli else "Lex_WholeFile"
 
-    from expressions import PrintExp
+    from expressions import PrintExp, VariableAssignmentExp, VariableExp, ConstantVariableExp
 
-    def Lex(self, script: str) -> PrintExp:
+    def Lex(self, script: str) -> PrintExp | VariableExp | ConstantVariableExp | VariableAssignmentExp:
         return getattr(self, self.lexFunction)(script)
     
-    def Lex_CLI(self, line: str) -> PrintExp:
+    def Lex_CLI(self, line: str) -> PrintExp | VariableExp | ConstantVariableExp | VariableAssignmentExp:
         command = line.split(' ')[0]
         
-        from keywords import KeywordsDict
-        expression = KeywordsDict(self).GetExpression(command=command)
+
+        expression = getRunnerInstance().keywords.GetExpression(command=command)
         return expression
 

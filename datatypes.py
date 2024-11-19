@@ -1,4 +1,6 @@
 from errors import MHscr_ValueError
+
+from helper import getRunnerInstance
 class String:
     """
     String class for MHscript.
@@ -10,14 +12,16 @@ class String:
     """
     value: str
     
-    def __init__(self, val: str) -> None:
-        if val[0] == val[-1] and (val[0] == '"' or val[0] == "'"):
+    def __init__(self, val: str | int | float) -> None:
+        if isinstance(val, (int, float)):
+            self.value = str(val)
+        elif val[0] == val[-1] and (val[0] == '"' or val[0] == "'"):
             self.value = val.replace(val[0], '')
         else:
-            raise ValueError(f"Value {val} cannot be converted to string")
+            raise MHscr_ValueError(f"Value {val} cannot be converted to string")
 
     def __str__(self) -> str:
-        return self.value
+        return f"'{self.value}'"
 class Int:
     """
     Integer class for MHscript.
@@ -51,7 +55,7 @@ class Float:
         else:
             self.value = float(val)
             if self.value.is_integer() and val.count('.') != 1:
-                raise ValueError
+                raise MHscr_ValueError("Unexpected float call for an integer value.")
 
     def __str__(self) -> str:
         return str(self.value)
@@ -82,24 +86,30 @@ class Let:
     -----------
         val: str - block of code to be stored. Raises ValueError if the value cannot be converted to any of the data types.
     """
-    def __init__(self, val:str) -> None:
-        self.value = GetDatatypeDynamically(val)
+    value: str | bool | int | float
+    def __init__(self, val:str | String | Bool | Float | Int) -> None:
+        self.value = val.value if isinstance(val, (String, Bool, Float, Int, Let)) else GetDatatypeDynamically(f"'{val}'") 
     
     def __str__(self) -> str:
+        if isinstance(self.value, str):
+            return f"'{self.value}'"
         return str(self.value)
 
 
 def GetDatatypeDynamically(val:str) -> String | Int | Bool | Float:
+    runner = getRunnerInstance()
+    if val in runner.variables:
+        return runner.variables[val].var
     try:
         return String(val)
-    except ValueError:
+    except MHscr_ValueError:
         pass
     try:
         return Float(val)
-    except ValueError:
+    except MHscr_ValueError:
         pass
     try:
         return Int(val)
-    except ValueError:
+    except MHscr_ValueError:
         pass
     return Bool(val, _dynamically_called=True)
