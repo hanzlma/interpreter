@@ -3,10 +3,13 @@ from errors import MHscr_ValueError, MHscr_TypeError, MHscr_OperatorError, MHscr
 from variable import Variable
 from keywords import KeywordsDict
 class CLIRunner:
-    """Runner for in-CLI interpreter."""
+    """Runner class for in-CLI interpreter."""
     variables: dict[str, Variable] = dict[str, Variable]()
-    keywords: KeywordsDict = KeywordsDict()
+    keywords: KeywordsDict
+    lexer: Lexer
+    
     def __init__(self) -> None:
+        self.keywords = KeywordsDict(self)
         self.lexer: Lexer = Lexer(self)
     def Run(self) -> None:
         print('MHscript version alpha 1')
@@ -17,7 +20,7 @@ class CLIRunner:
             inp = input('> ')
             while inp != 'exit':
                 try:
-                    expression = self.lexer.Lex(inp)(inp, True)
+                    expression = self.lexer.Lex(inp)(self, inp, True)
                     expression.execute()
                 except MHscr_ValueError as err:
                     print(f'> Code "{inp}" could not have been executed because of a ValueError!\nError: {err}')

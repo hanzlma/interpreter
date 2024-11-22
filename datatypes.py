@@ -1,6 +1,5 @@
 from errors import MHscr_ValueError
 
-from helper import getRunnerInstance
 class String:
     """
     String class for MHscript.
@@ -34,7 +33,6 @@ class Int:
     
     def __init__(self, val: str) -> None:
         self.value = int(val) # error handling in managing functions (if this function throws, the value is not an integer)
-    
     def __str__(self) -> str:
         return str(self.value)
         
@@ -96,8 +94,7 @@ class Let:
         return str(self.value)
 
 
-def GetDatatypeDynamically(val:str) -> String | Int | Bool | Float:
-    runner = getRunnerInstance()
+def GetDatatypeDynamically(runner, val:str) -> String | Int | Bool | Float:
     if val in runner.variables:
         return runner.variables[val].var
     try:
@@ -108,8 +105,8 @@ def GetDatatypeDynamically(val:str) -> String | Int | Bool | Float:
         return Float(val)
     except (MHscr_ValueError , ValueError):
         pass
-    #try:
+    try:
         return Int(val)
-    #except (MHscr_ValueError , ValueError):
-       # pass
+    except (MHscr_ValueError , ValueError):
+        pass
     return Bool(val, _dynamically_called=True)

@@ -1,24 +1,33 @@
-from helper import getRunnerInstance
 class Lexer:
     """
     Lexer class of MHscript interpreter.
     """
     cli: bool
     lexFunction: str
-    def __init__(self, parent) -> None:
+    def __init__(self, runner) -> None:
         from runner_cli import CLIRunner
-        self.cli = True if isinstance(parent, CLIRunner) else False #doplnit WholeFile typem
-        self.lexFunction = "Lex_CLI" if self.cli else "Lex_WholeFile"
+        self.cli = True if isinstance(runner, CLIRunner) else False #doplnit WholeFile typem
+        self.lexFunction = "Lex_CLI" if self.cli else "Lex_Wholefile"
+        self.runner = runner
 
-    from expressions import PrintExp, VariableAssignmentExp, VariableExp, ConstantVariableExp
+    from expressions import PrintExp, VariableAssignmentExp, VariableExp, ConstantVariableExp, InputExp
 
-    def Lex(self, script: str) -> PrintExp | VariableExp | ConstantVariableExp | VariableAssignmentExp:
+    def Lex(self, script: str | list[str]) -> PrintExp | VariableExp | ConstantVariableExp | VariableAssignmentExp | InputExp | list[PrintExp | VariableExp | ConstantVariableExp | VariableAssignmentExp | InputExp]:
         return getattr(self, self.lexFunction)(script)
     
-    def Lex_CLI(self, line: str) -> PrintExp | VariableExp | ConstantVariableExp | VariableAssignmentExp:
+    def Lex_CLI(self, line: str) -> PrintExp | VariableExp | ConstantVariableExp | VariableAssignmentExp | InputExp:
         command = line.split(' ')[0]
         
-
-        expression = getRunnerInstance().keywords.GetExpression(command=command)
+        expression = self.runner.keywords.GetExpression(command=command)
         return expression
+    
+    def Lex_Wholefile(self, lines: list[str]) -> list[PrintExp | VariableExp | ConstantVariableExp | VariableAssignmentExp | InputExp]:
+        expressions = []
+        for line in lines:
+            expressions.append(self.runner.keywords.GetExpression(command=line.split(' ')[0]))
+            from expressions import VariableExp, VariableAssignmentExp
+            
+            if expressions[-1] is VariableExp:
+                self.runner.keywords.dictionary[line.split(' ')[1]] = VariableAssignmentExp
+        return expressions
 

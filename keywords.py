@@ -4,10 +4,11 @@ class KeywordsDict:
     """
     Translates keyword into class reference.
     """
-    from expressions import PrintExp, VariableExp, ConstantVariableExp
+    from expressions import PrintExp, InputExp,VariableExp, ConstantVariableExp, IfExpression, EndIfExpression
     dictionary: dict[str, ] = {
     
         'print': PrintExp,
+        'input': InputExp,
         'string': VariableExp,
         'int': VariableExp,
         'float': VariableExp,
@@ -15,8 +16,17 @@ class KeywordsDict:
         'let': VariableExp,
         'const': ConstantVariableExp,
     }
+    wholefileOnlyDictionary: dict[str, ] = {
+        'if': IfExpression,
+        'endif': EndIfExpression,
+    }
+    def __init__(self, runner, cli = True) -> None:
+        self.runner = runner
+        if not cli:
+            self.dictionary.update(self.wholefileOnlyDictionary)
+       
     def GetExpression(self, command) -> PrintExp:
         try:
             return self.dictionary[command]
         except KeyError as err:
-            raise MHscr_KeywordError(f"Unknown keyword {err}" if command not in getRunnerInstance().variables.keys() else f"Cannot change value of an initialized constant {command}")
+            raise MHscr_KeywordError(f"Unknown keyword {err}" if command not in self.runner.variables.keys() else f"Cannot change value of an initialized constant {command}")
