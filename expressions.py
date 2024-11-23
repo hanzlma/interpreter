@@ -16,7 +16,16 @@ def PrepareValue(runner, argument: str, arguments: list[str]):
             args.append(GetDatatypeDynamically(runner, x))
         return DynamicCalculator.CalculateDynamicOperations(args, operators)
 
-class PrintExp:
+class Expression:
+    
+    def __init__(self, runner, inp:str, cli: bool) -> None:
+        self.runner = runner
+        self.inp = inp
+        self.cli = cli
+    
+    def execute(self) -> None:
+        pass
+class PrintExp(Expression):
     """
     Print expression.
     Structure:
@@ -31,9 +40,7 @@ class PrintExp:
     arguments: list
     printvalue: str
     def __init__(self, runner, inp: str, cli: bool) -> None:
-        self.runner = runner
-        self.inp = inp
-        self.cli = cli
+        super().__init__(runner, inp, cli)
         
         self.prepareArguments()
     
@@ -46,7 +53,7 @@ class PrintExp:
         print(f"{'> ' if self.cli else ''}{self.printvalue}")
 
         
-class InputExp:
+class InputExp(Expression):
     """
     Input expression.
     Structure:
@@ -61,9 +68,7 @@ class InputExp:
     msg: str | None
     
     def __init__(self, runner, inp: str, cli:bool) -> None:
-        self.runner = runner
-        self.inp = inp
-        self.cli = cli
+        super().__init__(runner, inp, cli)
         self.name = None
         self.msg = None
         
@@ -107,7 +112,7 @@ class InputExp:
             self.runner.variables[self.name] = Variable(self.name, type(value), value)
             
         
-class VariableExp:
+class VariableExp(Expression):
     """
     
     """
@@ -121,9 +126,7 @@ class VariableExp:
     const: bool
     
     def __init__(self, runner, inp: str, cli: bool, const: bool = False) -> None:
-        self.runner = runner
-        self.inp = inp
-        self.cli = cli
+        super().__init__(runner, inp, cli)
         self.const = const
         
         self.prepareArguments()
@@ -161,20 +164,18 @@ class VariableExp:
         except KeyError:
             raise MHscr_KeywordError(f"Datatype {datatypeName} is not a valid datatype for a {'constant ' if self.const else ''}variable.", self.runner.expressions.index(self) if not self.cli else None)
         
-class ConstantVariableExp:
+class ConstantVariableExp(Expression):
     
     cli: bool
     inp: str
     
     def __init__(self, runner, inp: str, cli: bool) -> None:
-        self.runner = runner
-        self.inp = inp.replace('const ', '')
-        self.cli = cli
+        super().__init__(runner, inp.replace('const ', ''), cli)
 
     def execute(self) -> None:
         VariableExp(self.runner,self.inp, self.cli, True).execute()
 
-class VariableAssignmentExp:
+class VariableAssignmentExp(Expression):
     cli: bool
     inp: str
     name: str
@@ -183,9 +184,7 @@ class VariableAssignmentExp:
     var: String | Int | Float | Bool | Let
     
     def __init__(self, runner, inp: str, cli: bool) -> None:
-        self.runner = runner
-        self.inp = inp
-        self.cli = cli
+        super().__init__(runner, inp, cli)
         
         self.prepareArguments()
         
@@ -212,42 +211,141 @@ class VariableAssignmentExp:
         self.arguments = SplitByOperators(self.argument)
 
         
-class IfExpression:
+class IfExpression(Expression):
     
     inp: str
     argument: str
     arguments: list[str]
+    expressions: list
     
     def __init__(self, runner, inp: str, cli) -> None:
-        self.runner = runner
-        self.inp = inp
-        
+        super().__init__(runner, inp, cli)
+        self.expressions = []
+        self.firstCall = True
         self.prepareArguments()
     
     def execute(self) -> None:
-        value = Bool(PrepareValue(self.runner, self.argument, self.arguments).value).value
-        nested: int = 0
+        if self.firstCall:
+            self.firstCall = False
+            self.firstExec()
         
-        index: int = self.runner.expressions.index(self)
-        for exp in self.runner.expressions[index + 1:]:
-            if isinstance(exp, IfExpression):
-                nested += 1
-            if isinstance(exp, EndIfExpression):
-                if nested == 0:
-                    return
-                nested -= 1
-            if not value: 
-                self.runner.expressions.remove(exp)
-        raise MHscr_SyntaxError("Missing endif expression.", index)
+        value = Bool(PrepareValue(self.runner, self.argument, self.arguments).value).value
+        if value:
+            for exp in self.expressions:
+                exp.execute()
 
     def prepareArguments(self) -> None:
         self.argument = self.inp.replace('if ', '')
         self.arguments = SplitByOperators(self.argument)
+        
+    def firstExec(self) -> None:
+        nested: int = 0
+        
+        index: int = self.runner.source_expressions.index(self)
+        
+        if not any(isinstance(expression, EndIfExpression) for expression in self.runner.source_expressions[index+1:]):
+            raise MHscr_SyntaxError("Missing endif statement.", index)
+        for expression in self.runner.source_expressions[index + 1:]:
+            if isinstance(expression, (EndIfExpression, EndWhileExpression)):
+                    if nested == 0:
+                        break
+                    else: 
+                        nested -= 1
+                        continue
+            elif isinstance(expression, (IfExpression, WhileExpression)):
+                    self.expressions.append(expression)
+                    nested += 1
+                    continue
+            elif nested == 0:
+                    self.expressions.append(expression)
+
+        for expression in self.runner.expressions[self.runner.expressions.index(self) + 1:]:
+                if isinstance(expression, (EndIfExpression, EndWhileExpression)):
+                    if nested == 0:
+                        break
+                    else: 
+                        nested -= 1
+                        continue
+                if isinstance(expression, (IfExpression, WhileExpression)):
+                    
+                    nested += 1
+                    continue
+                self.runner.expressions.remove(expression)
     
-class EndIfExpression:
+class EndIfExpression(Expression):
+    pass
     
-    def __init__(self, runner, inp, cli) -> None:
-        pass
+class WhileExpression(Expression):
     
-    def execute(self):
-        pass
+    inp: str
+    argument: str
+    arguments: list[str]
+    expressions: list
+    
+    def __init__(self, runner, inp: str, cli: bool) -> None:
+        super().__init__(runner, inp, cli)
+        self.firstCall = True
+        self.expressions = []
+        self.prepareArguments()
+        
+    def execute(self) -> None:
+        value = Bool(PrepareValue(self.runner, self.argument, self.arguments).value).value
+
+        if self.firstCall:
+            self.firstCall = False
+            self.firstExec()
+        
+        while value:
+            for expression in self.expressions:
+                expression.execute()
+            value = Bool(PrepareValue(self.runner, self.argument, self.arguments).value).value
+
+
+    
+        
+                    
+    
+    def prepareArguments(self) -> None:
+        self.argument = self.inp.replace('while ', '')
+        self.arguments = SplitByOperators(self.argument)
+        
+    
+    def firstExec(self) -> None:
+        nested: int = 0
+        index: int = self.runner.source_expressions.index(self)
+        if not any(isinstance(expression, (EndIfExpression, EndWhileExpression)) for expression in self.runner.source_expressions[index+1:]):
+            raise MHscr_SyntaxError("Missing endwhile statement.", index)
+        
+        for expression in self.runner.source_expressions[index+1:]:
+                if isinstance(expression, (EndIfExpression, EndWhileExpression)):
+                    if nested == 0:
+                        break
+                    else: 
+                        nested -= 1
+                        continue
+                elif isinstance(expression, (IfExpression, WhileExpression)):
+                    self.expressions.append(expression)
+                    nested += 1
+                    continue
+                elif nested == 0:
+                    self.expressions.append(expression)
+        
+        nested = 0
+                
+        
+        for expression in self.runner.expressions[self.runner.expressions.index(self) + 1:]:
+                if isinstance(expression, (EndIfExpression, EndWhileExpression)):
+                    if nested == 0:
+                        break
+                    else: 
+                        nested -= 1
+                        continue
+                if isinstance(expression, (IfExpression, WhileExpression)):
+                    
+                    nested += 1
+                    continue
+                self.runner.expressions.remove(expression)
+
+
+class EndWhileExpression(Expression):
+    pass

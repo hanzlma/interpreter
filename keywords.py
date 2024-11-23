@@ -1,10 +1,9 @@
 from errors import MHscr_KeywordError
-from helper import getRunnerInstance
 class KeywordsDict:
     """
     Translates keyword into class reference.
     """
-    from expressions import PrintExp, InputExp,VariableExp, ConstantVariableExp, IfExpression, EndIfExpression
+    from expressions import PrintExp, InputExp,VariableExp, ConstantVariableExp, IfExpression, EndIfExpression, WhileExpression, EndWhileExpression
     dictionary: dict[str, ] = {
     
         'print': PrintExp,
@@ -19,6 +18,8 @@ class KeywordsDict:
     wholefileOnlyDictionary: dict[str, ] = {
         'if': IfExpression,
         'endif': EndIfExpression,
+        'while': WhileExpression,
+        'endwhile': EndWhileExpression,
     }
     def __init__(self, runner, cli = True) -> None:
         self.runner = runner

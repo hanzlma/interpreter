@@ -30,6 +30,7 @@ class WholefileRunner:
                 lines[i] = lines[i].replace('\n', '')
             commands = self.lexer.Lex(lines)
             self.expressions = [commands[i](runner=self, inp=lines[i], cli=False) for i in range(len(commands))]
+            self.source_expressions = self.expressions.copy()
             for expression in self.expressions:
                 expression.execute()
         except (MHscr_KeywordError, MHscr_OperatorError, MHscr_TypeError, MHscr_ValueError, MHscr_TypeError, MHscr_SyntaxError) as err:
