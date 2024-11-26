@@ -71,7 +71,7 @@ class Bool:
         if isinstance(val, bool):
             pass
         elif _dynamically_called and val != 'True' and val!= 'False': 
-            raise MHscr_ValueError("Dynamically typed value can only be turned to Bool if it is True or False")
+            raise MHscr_ValueError(f"Dynamically typed value '{val}' can only be turned to Bool if it is True or False")
         self.value = bool(val) if val != 'False' else False
     
     def __str__(self) -> str:

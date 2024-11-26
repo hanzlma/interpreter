@@ -3,7 +3,10 @@ class KeywordsDict:
     """
     Translates keyword into class reference.
     """
-    from expressions import PrintExp, InputExp,VariableExp, ConstantVariableExp, IfExpression, EndIfExpression, WhileExpression, EndWhileExpression
+    from Expressions.branchingAndCycles import IfExpression, EndIfExpression, WhileExpression, EndWhileExpression, ForExpression, EndForExpression
+    from Expressions.variable import VariableExp, VariableAssignmentExp, ConstantVariableExp
+    from Expressions.print import PrintExp
+    from Expressions.input import InputExp
     dictionary: dict[str, ] = {
     
         'print': PrintExp,
@@ -20,6 +23,8 @@ class KeywordsDict:
         'endif': EndIfExpression,
         'while': WhileExpression,
         'endwhile': EndWhileExpression,
+        'for': ForExpression,
+        'endfor': EndForExpression,
     }
     def __init__(self, runner, cli = True) -> None:
         self.runner = runner

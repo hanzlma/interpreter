@@ -10,7 +10,9 @@ class Lexer:
         self.lexFunction = "Lex_CLI" if self.cli else "Lex_Wholefile"
         self.runner = runner
 
-    from expressions import PrintExp, VariableAssignmentExp, VariableExp, ConstantVariableExp, InputExp
+    from Expressions.variable import VariableExp, VariableAssignmentExp, ConstantVariableExp
+    from Expressions.print import PrintExp
+    from Expressions.input import InputExp
 
     def Lex(self, script: str | list[str]) -> PrintExp | VariableExp | ConstantVariableExp | VariableAssignmentExp | InputExp | list[PrintExp | VariableExp | ConstantVariableExp | VariableAssignmentExp | InputExp]:
         return getattr(self, self.lexFunction)(script)
@@ -25,7 +27,7 @@ class Lexer:
         expressions = []
         for line in lines:
             expressions.append(self.runner.keywords.GetExpression(command=line.split(' ')[0]))
-            from expressions import VariableExp, VariableAssignmentExp
+            from Expressions.variable import VariableExp, VariableAssignmentExp
             
             if expressions[-1] is VariableExp:
                 self.runner.keywords.dictionary[line.split(' ')[1]] = VariableAssignmentExp
