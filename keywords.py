@@ -7,6 +7,7 @@ class KeywordsDict:
     from Expressions.variable import VariableExp, VariableAssignmentExp, ConstantVariableExp
     from Expressions.print import PrintExp
     from Expressions.input import InputExp
+    from Expressions.function import FunctionDefinitionExpression, EndFunctionDefinitionExpression
     dictionary: dict[str, ] = {
     
         'print': PrintExp,
@@ -25,6 +26,8 @@ class KeywordsDict:
         'endwhile': EndWhileExpression,
         'for': ForExpression,
         'endfor': EndForExpression,
+        'fn': FunctionDefinitionExpression,
+        'endfn': EndFunctionDefinitionExpression,
     }
     def __init__(self, runner, cli = True) -> None:
         self.runner = runner

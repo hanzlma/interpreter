@@ -32,11 +32,11 @@ class VariableExp(Expression):
         self.argument = self.inp.replace(f"{parts[0]} {parts[1]} {parts[2]} ", "")
         self.arguments = SplitByOperators(self.argument)          
 
-    def execute(self)->None:
+    def execute(self, functionCall=False)->None:
         self.var = PrepareValue(self.runner, self.argument, self.arguments)
         if self.name in self.runner.variables:
             raise MHscr_ValueError(f"Variable '{self.name}' already initialized.", self.runner.expressions.index(self) if not self.cli else None)
-        self.runner.variables[self.name] = Variable(self.name, self.datatype, self.var, self.const)
+        self.runner.variables[self.name] = Variable(self.name, self.datatype, self.var, self.const, local=functionCall)
         if not self.const:
             self.runner.keywords.dictionary[self.name] = VariableAssignmentExp
         
@@ -55,6 +55,21 @@ class VariableExp(Expression):
         except KeyError:
             raise MHscr_KeywordError(f"Datatype {datatypeName} is not a valid datatype for a {'constant ' if self.const else ''}variable.", self.runner.expressions.index(self) if not self.cli else None)
         
+    def GetDatatype(runner, callerExpression, datatypeName: str):
+        dictionary: dict[str, ] = {
+            'string': String,
+            'int': Int,
+            'float': Float,
+            'bool': Bool,
+            'let': Let
+        }
+        
+        try:
+            return dictionary[datatypeName]
+        except KeyError:
+            from runner_cli import CLIRunner
+            raise MHscr_KeywordError(f"Datatype {datatypeName} is not a valid datatype for a variable.", runner.expressions.index(callerExpression) if not isinstance(runner, CLIRunner) else None)
+        
 class ConstantVariableExp(Expression):
     
     cli: bool
@@ -63,7 +78,7 @@ class ConstantVariableExp(Expression):
     def __init__(self, runner, inp: str, cli: bool) -> None:
         super().__init__(runner, inp.replace('const ', ''), cli)
 
-    def execute(self) -> None:
+    def execute(self, functionCall=False) -> None:
         VariableExp(self.runner,self.inp, self.cli, True).execute()
 
 class VariableAssignmentExp(Expression):
@@ -79,7 +94,7 @@ class VariableAssignmentExp(Expression):
         
         self.prepareArguments()
         
-    def execute(self) -> None:
+    def execute(self, functionCall=False) -> None:
         self.var = PrepareValue(self.runner, self.argument, self.arguments)
         if self.name not in self.runner.variables:
             raise MHscr_ValueError(f"Variable {self.name} not initialized", self.runner.expressions.index(self) if not self.cli else None)
@@ -91,7 +106,7 @@ class VariableAssignmentExp(Expression):
         if isinstance(self.runner.variables[self.name].var, Let):
             self.var = Let(self.var)
         
-        self.runner.variables[self.name] = Variable(self.name, self.runner.variables[self.name].datatype, self.var, False)
+        self.runner.variables[self.name] = Variable(self.name, self.runner.variables[self.name].datatype, self.var, False, local=self.runner.variables[self.name].local)
 
     def prepareArguments(self) -> None:
         parts = self.inp.split(' ')

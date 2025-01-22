@@ -54,7 +54,7 @@ class InputExp(Expression):
         else:
             raise MHscr_ValueError("Unexpected argument count", self.runner.expressions.index(self) if not self.cli else None)
 
-    def execute(self) -> None:
+    def execute(self, functionCall=False) -> None:
         
         value = input(f"{'[input]> ' if self.cli else ''}{self.msg if self.msg is not None else ''}")
         if self.name:

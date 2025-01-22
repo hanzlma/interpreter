@@ -28,8 +28,11 @@ class Lexer:
         for line in lines:
             expressions.append(self.runner.keywords.GetExpression(command=line.split(' ')[0]))
             from Expressions.variable import VariableExp, VariableAssignmentExp
+            from Expressions.function import FunctionDefinitionExpression, FunctionCallExpression
             
             if expressions[-1] is VariableExp:
                 self.runner.keywords.dictionary[line.split(' ')[1]] = VariableAssignmentExp
+            elif expressions[-1] is FunctionDefinitionExpression:
+                self.runner.keywords.dictionary[line.split(' ')[1]] = FunctionCallExpression
         return expressions
 

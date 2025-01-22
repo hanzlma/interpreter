@@ -2,6 +2,7 @@ from lexer import Lexer
 from errors import MHscr_ValueError, MHscr_TypeError, MHscr_OperatorError, MHscr_KeywordError, MHscr_SyntaxError
 from variable import Variable
 from keywords import KeywordsDict
+from function import Function
 
 class WholefileRunner:
     """Runner class for wholefile interpreter."""
@@ -11,6 +12,7 @@ class WholefileRunner:
     lexer: Lexer
     filepath: str
     expressions: list = []
+    functions: list[Function] = []
     
     def __init__(self, filepath:str) -> None:
         self.filepath = filepath

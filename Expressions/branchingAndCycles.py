@@ -3,7 +3,6 @@ from operators import SplitByOperators
 from datatypes import Bool
 from errors import MHscr_SyntaxError
 from .variable import VariableExp, VariableAssignmentExp
-
 class IfExpression(Expression):
 
     inp: str
@@ -16,32 +15,34 @@ class IfExpression(Expression):
         self.expressions = []
         self.firstCall = True
         self.prepareArguments()
-    
-    def execute(self) -> None:
+
+    def execute(self, functionCall=False) -> None:
+        
         value = Bool(PrepareValue(self.runner, self.argument, self.arguments).value).value
+        runner = functionCall if functionCall else self.runner
         if self.firstCall:
             self.firstCall = False
-            self.firstExec()
-            self.remove(value)
+            self.firstExec(runner)
+            self.remove(value, runner)
         
 
         if value:
             for exp in self.expressions:
-                exp.execute()
+                exp.execute(functionCall)
         
 
     def prepareArguments(self) -> None:
         self.argument = self.inp.replace('if ', '')
         self.arguments = SplitByOperators(self.argument)
         
-    def firstExec(self) -> None:
+    def firstExec(self, runner) -> None:
         nested: int = 0
         
-        index: int = self.runner.source_expressions.index(self)
+        index: int = runner.source_expressions.index(self)
         
-        if not any(isinstance(expression, EndIfExpression) for expression in self.runner.source_expressions[index+1:]):
+        if not any(isinstance(expression, EndIfExpression) for expression in runner.source_expressions[index+1:]):
             raise MHscr_SyntaxError("Missing endif statement.", index)
-        for expression in self.runner.source_expressions[index + 1:]:
+        for expression in runner.source_expressions[index + 1:]:
             if isinstance(expression, (EndIfExpression, EndWhileExpression, EndForExpression)):
                     if nested == 0:
                         break
@@ -57,10 +58,10 @@ class IfExpression(Expression):
                     self.expressions.append(expression)
 
         
-    def remove(self, value: bool) -> None:
+    def remove(self, value: bool, runner) -> None:
         nested = 0
         if not value:
-            for expression in self.runner.source_expressions[self.runner.source_expressions.index(self) + 1:]:
+            for expression in runner.source_expressions[runner.source_expressions.index(self) + 1:]:
                 if isinstance(expression, (EndIfExpression)):
                     if nested == 0:
                         break
@@ -72,9 +73,9 @@ class IfExpression(Expression):
                     nested += 1
                     
                 
-                self.runner.expressions.remove(expression)
+                runner.expressions.remove(expression)
             return
-        for expression in self.runner.source_expressions[self.runner.source_expressions.index(self) + 1:]:
+        for expression in runner.source_expressions[runner.source_expressions.index(self) + 1:]:
                 if isinstance(expression, (EndIfExpression, EndWhileExpression, EndForExpression)):
                     if nested == 0:
                         break
@@ -83,12 +84,12 @@ class IfExpression(Expression):
                         continue
                 if isinstance(expression, (IfExpression, WhileExpression, ForExpression)):
                     if nested == 0:
-                        self.runner.expressions.remove(expression)
+                        runner.expressions.remove(expression)
                     nested += 1
                     continue
                 if nested != 0:
                     continue
-                self.runner.expressions.remove(expression)
+                runner.expressions.remove(expression)
 class EndIfExpression(Expression):
     pass
 
@@ -105,12 +106,12 @@ class WhileExpression(Expression):
         self.expressions = []
         self.prepareArguments()
 
-    def execute(self) -> None:
+    def execute(self, functionCall=False) -> None:
         value = Bool(PrepareValue(self.runner, self.argument, self.arguments).value).value
-
+        runner = functionCall if functionCall else self.runner
         if self.firstCall:
             self.firstCall = False
-            self.firstExec()
+            self.firstExec(runner)
 
         while value:
             for expression in self.expressions:
@@ -121,13 +122,13 @@ class WhileExpression(Expression):
         self.argument = self.inp.replace('while ', '')
         self.arguments = SplitByOperators(self.argument)
 
-    def firstExec(self) -> None:
+    def firstExec(self, runner) -> None:
         nested: int = 0
-        index: int = self.runner.source_expressions.index(self)
-        if not any(isinstance(expression, EndWhileExpression) for expression in self.runner.source_expressions[index+1:]):
+        index: int = runner.source_expressions.index(self)
+        if not any(isinstance(expression, EndWhileExpression) for expression in runner.source_expressions[index+1:]):
             raise MHscr_SyntaxError("Missing endwhile statement.", index)
 
-        for expression in self.runner.source_expressions[index+1:]:
+        for expression in runner.source_expressions[index+1:]:
                 if isinstance(expression, (EndIfExpression, EndWhileExpression, EndForExpression)):
                     if nested == 0:
                         break
@@ -143,8 +144,8 @@ class WhileExpression(Expression):
                     self.expressions.append(expression)
 
         nested = 0
-
-        for expression in self.runner.source_expressions[self.runner.source_expressions.index(self) + 1:]:
+        
+        for expression in runner.source_expressions[runner.source_expressions.index(self) + 1:]:
                 if isinstance(expression, (EndIfExpression, EndWhileExpression, EndForExpression)):
                     if nested == 0:
                         break
@@ -153,12 +154,12 @@ class WhileExpression(Expression):
                         continue
                 if isinstance(expression, (IfExpression, WhileExpression, ForExpression)):
                     if nested == 0:
-                        self.runner.expressions.remove(expression)
+                        runner.expressions.remove(expression)
                     nested += 1
                     continue
                 if nested != 0:
                     continue
-                self.runner.expressions.remove(expression)
+                runner.expressions.remove(expression)
 
 class EndWhileExpression(Expression):
     pass
@@ -188,10 +189,11 @@ class ForExpression(Expression):
         self.iteration = VariableAssignmentExp(self.runner, self.argument[2], False)
         self.declared_varname = self.declaration.name
         
-    def execute(self) -> None:
+    def execute(self, functionCall=False) -> None:
+        runner = functionCall if functionCall else self.runner
         if self.firstCall:
             self.firstCall = False
-            self.firstExec()
+            self.firstExec(runner)
         
         self.declaration.execute()
         
@@ -205,13 +207,13 @@ class ForExpression(Expression):
 
         self.runner.variables.pop(self.declared_varname)
 
-    def firstExec(self) -> None:
+    def firstExec(self, runner) -> None:
         nested: int = 0
-        index: int = self.runner.source_expressions.index(self)
-        if not any(isinstance(expression, EndForExpression) for expression in self.runner.source_expressions[index+1:]):
+        index: int = runner.source_expressions.index(self)
+        if not any(isinstance(expression, EndForExpression) for expression in runner.source_expressions[index+1:]):
             raise MHscr_SyntaxError("Missing endfor statement.", index)
 
-        for expression in self.runner.source_expressions[index+1:]:
+        for expression in runner.source_expressions[index+1:]:
                 if isinstance(expression, (EndIfExpression, EndWhileExpression, EndForExpression)):
                     if nested == 0:
                         break
@@ -227,8 +229,8 @@ class ForExpression(Expression):
                     self.expressions.append(expression)
 
         nested = 0
-
-        for expression in self.runner.source_expressions[self.runner.source_expressions.index(self) + 1:]:
+        
+        for expression in runner.source_expressions[runner.source_expressions.index(self) + 1:]:
                 if isinstance(expression, (EndIfExpression, EndWhileExpression, EndForExpression)):
                     if nested == 0:
                         break
@@ -237,12 +239,12 @@ class ForExpression(Expression):
                         continue
                 if isinstance(expression, (IfExpression, WhileExpression, ForExpression)):
                     if nested == 0:
-                        self.runner.expressions.remove(expression)
+                        runner.expressions.remove(expression)
                     nested += 1
                     continue
                 if nested != 0:
                     continue
-                self.runner.expressions.remove(expression)
+                runner.expressions.remove(expression)
                 
 
 

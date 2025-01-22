@@ -26,3 +26,6 @@ class MHscr_KeywordError(MHscr_Error):
 
 class MHscr_SyntaxError(MHscr_Error):
     pass
+
+class MHscr_RuntimeError(MHscr_Error):
+    pass

@@ -19,7 +19,7 @@ class Expression:
         self.inp = inp
         self.cli = cli
     
-    def execute(self) -> None:
+    def execute(self, functionCall=False) -> None:
         pass
 
 
