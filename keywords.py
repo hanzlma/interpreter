@@ -38,4 +38,4 @@ class KeywordsDict:
         try:
             return self.dictionary[command]
         except KeyError as err:
-            raise MHscr_KeywordError(f"Unknown keyword {err}" if command not in self.runner.variables.keys() else f"Cannot change value of an initialized constant {command}")
+            raise MHscr_KeywordError(f"Unknown keyword {err}" if command not in self.runner.variables.keys() else f"Cannot change value of an initialized constant {command}", command=command)

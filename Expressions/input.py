@@ -41,7 +41,7 @@ class InputExp(Expression):
             if args[0] in self.runner.keywords.dictionary.keys():
                 self.name = args[0]
             else:
-                raise MHscr_ValueError("Variable not initialized", self.runner.expressions.index(self) if not self.cli else None)
+                raise MHscr_ValueError("Variable not initialized", line=self.runner.expressions.index(self) if not self.cli else None)
         elif len(args) == 2:
             if args[0] in self.runner.keywords.dictionary.keys():
                 self.name = args[0]
@@ -50,9 +50,9 @@ class InputExp(Expression):
                 self.name = args[1]
                 self.msg = String(args[0]).value
             else:
-                raise MHscr_ValueError("Variable not initialized", self.runner.expressions.index(self) if not self.cli else None)
+                raise MHscr_ValueError("Variable not initialized", line=self.runner.expressions.index(self) if not self.cli else None)
         else:
-            raise MHscr_ValueError("Unexpected argument count", self.runner.expressions.index(self) if not self.cli else None)
+            raise MHscr_ValueError("Unexpected argument count", line=self.runner.expressions.index(self) if not self.cli else None)
 
     def execute(self, functionCall=False) -> None:
         
@@ -60,5 +60,5 @@ class InputExp(Expression):
         if self.name:
             value = GetDatatypeDynamically(self.runner, value)
             if not isinstance(value, self.runner.variables[self.name].datatype) and self.runner.variables[self.name].datatype is not Let:
-                raise MHscr_TypeError(f"Variable of type {self.runner.variables[self.name].datatype} cannot be assigned value of type {type(value)}.", self.runner.expressions.index(self) if not self.cli else None)
+                raise MHscr_TypeError(f"Variable of type {self.runner.variables[self.name].datatype} cannot be assigned value of type {type(value)}.", line=self.runner.expressions.index(self) if not self.cli else None)
             self.runner.variables[self.name] = Variable(self.name, type(value), value)

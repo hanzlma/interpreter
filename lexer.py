@@ -1,3 +1,4 @@
+from errors import MHscr_KeywordError
 class Lexer:
     """
     Lexer class of MHscript interpreter.
@@ -26,7 +27,10 @@ class Lexer:
     def Lex_Wholefile(self, lines: list[str]) -> list[PrintExp | VariableExp | ConstantVariableExp | VariableAssignmentExp | InputExp]:
         expressions = []
         for line in lines:
-            expressions.append(self.runner.keywords.GetExpression(command=line.split(' ')[0]))
+            try:
+                expressions.append(self.runner.keywords.GetExpression(command=line.split(' ')[0]))
+            except MHscr_KeywordError as err:
+                raise MHscr_KeywordError(err.message, command=line)
             from Expressions.variable import VariableExp, VariableAssignmentExp
             from Expressions.function import FunctionDefinitionExpression, FunctionCallExpression
             

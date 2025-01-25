@@ -31,7 +31,7 @@ class FunctionDefinitionExpression(Expression):
         index = self.runner.source_expressions.index(self)
 
         if not any([isinstance(expression, EndFunctionDefinitionExpression) for expression in self.runner.source_expressions[index + 1:]]):
-            raise MHscr_SyntaxError("Missing endfn statement.", index)
+            raise MHscr_SyntaxError("Missing endfn statement.", line=index)
 
         for expression in self.runner.source_expressions[index + 1:]:
             if isinstance(expression, EndFunctionDefinitionExpression):
@@ -44,7 +44,7 @@ class FunctionDefinitionExpression(Expression):
         self.getExpressions()
         
         if any([fn.name == self.name for fn in self.runner.functions]):
-            raise MHscr_RuntimeError(f"Function '{self.name}' is already defined.", self.runner.source_expressions.index(self))
+            raise MHscr_RuntimeError(f"Function '{self.name}' is already defined.", line=self.runner.source_expressions.index(self))
         
         self.runner.functions.append(Function(self.name, self.defined_arguments, self.expressions))
         
@@ -53,7 +53,6 @@ class FunctionDefinitionExpression(Expression):
 
 class EndFunctionDefinitionExpression(Expression):
     pass
-#VYMAZAT PRIKAZY ZE STACKU FUKNCE PRI VETVENI A CYKLECH
 class FunctionCallExpression(Expression):
     
     name: str
@@ -71,11 +70,11 @@ class FunctionCallExpression(Expression):
                 self.function = fn
                 break
         if not self.function:
-            raise MHscr_RuntimeError("Function does not exist.", self.runner.source_expressions.index(self))
+            raise MHscr_RuntimeError("Function does not exist.", line=self.runner.source_expressions.index(self))
         for i in range(len(self.function.arguments)):
             (datatype, name) = self.function.arguments[i]
             if name in self.runner.variables.keys():
-                raise MHscr_RuntimeError(f"Variable {name} already initialized.", self.runner.source_expressions.index(self))
+                raise MHscr_RuntimeError(f"Variable {name} already initialized.", line=self.runner.source_expressions.index(self))
             self.runner.variables[name] = Variable(name, datatype, datatype(self.arguments[i]), local=True)
             
         for expression in self.function.expressions:

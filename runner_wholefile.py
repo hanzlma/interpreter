@@ -1,5 +1,5 @@
 from lexer import Lexer
-from errors import MHscr_ValueError, MHscr_TypeError, MHscr_OperatorError, MHscr_KeywordError, MHscr_SyntaxError
+from errors import MHscr_Error
 from variable import Variable
 from keywords import KeywordsDict
 from function import Function
@@ -28,16 +28,34 @@ class WholefileRunner:
         try:
             file = open(self.filepath)
             lines = file.readlines()
-            for i in range(len(lines)):
-                lines[i] = lines[i].replace('\n', '')
-            commands = self.lexer.Lex(lines)
-            self.expressions = [commands[i](runner=self, inp=lines[i], cli=False) for i in range(len(commands))]
-            self.source_expressions = self.expressions.copy()
-            for expression in self.expressions:
-                expression.execute()
-        except (MHscr_KeywordError, MHscr_OperatorError, MHscr_TypeError, MHscr_ValueError, MHscr_TypeError, MHscr_SyntaxError) as err:
-            print(f"Program encountered an exception: line {err.line}, {err.get_name()}: {err.message}")
+        except Exception as Err:
+            print(Err)
         finally:
             file.close()
+        
+        for i in range(len(lines)):
+            lines[i] = lines[i].replace('\n', '')
+        try:
+            commands = self.lexer.Lex(lines)
+        except MHscr_Error as err:
+            print(f"Program encountered an exception: line {lines.index(err.command)}, {err.get_name()}: {err.message}")
+            exit()
+            
+        try:
+            self.expressions = [commands[i](runner=self, inp=lines[i], cli=False) for i in range(len(commands))]
+
+        except MHscr_Error as err:
+            print(f"Program encountered an exception: line {err.line if err.line else lines.index(err.command)}, {err.get_name()}: {err.message}")
+            exit()
+
+        self.source_expressions = self.expressions.copy()
+            
+
+        for expression in self.expressions:
+            try: 
+                expression.execute()
+            except MHscr_Error as err:
+                print(f"Program encountered an exception: line {err.line if err.line else self.expressions.index(expression)}, {err.get_name()}: {err.message}")
+                exit()
         
     

@@ -41,7 +41,7 @@ class IfExpression(Expression):
         index: int = runner.source_expressions.index(self)
         
         if not any(isinstance(expression, EndIfExpression) for expression in runner.source_expressions[index+1:]):
-            raise MHscr_SyntaxError("Missing endif statement.", index)
+            raise MHscr_SyntaxError("Missing endif statement.", line=index)
         for expression in runner.source_expressions[index + 1:]:
             if isinstance(expression, (EndIfExpression, EndWhileExpression, EndForExpression)):
                     if nested == 0:
@@ -126,7 +126,7 @@ class WhileExpression(Expression):
         nested: int = 0
         index: int = runner.source_expressions.index(self)
         if not any(isinstance(expression, EndWhileExpression) for expression in runner.source_expressions[index+1:]):
-            raise MHscr_SyntaxError("Missing endwhile statement.", index)
+            raise MHscr_SyntaxError("Missing endwhile statement.", line=index)
 
         for expression in runner.source_expressions[index+1:]:
                 if isinstance(expression, (EndIfExpression, EndWhileExpression, EndForExpression)):
@@ -211,7 +211,7 @@ class ForExpression(Expression):
         nested: int = 0
         index: int = runner.source_expressions.index(self)
         if not any(isinstance(expression, EndForExpression) for expression in runner.source_expressions[index+1:]):
-            raise MHscr_SyntaxError("Missing endfor statement.", index)
+            raise MHscr_SyntaxError("Missing endfor statement.", line=index)
 
         for expression in runner.source_expressions[index+1:]:
                 if isinstance(expression, (EndIfExpression, EndWhileExpression, EndForExpression)):

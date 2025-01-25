@@ -26,3 +26,6 @@ def getRunnerInstance():
         if str(instance).find('Runner') != -1:
             return instance
     raise
+
+def getLineNumberFromExpression(expression, runner):
+    return runner.source_expressions.index(expression)

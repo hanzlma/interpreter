@@ -157,16 +157,20 @@ class DynamicCalculator:
         T: type = type(left)
         type_argument: type = type(right)
         
-        if T is Bool or T is String:
-            raise MHscr_TypeError(f"Type {T} cannot be used in a divising operation.")
-        elif type_argument is Bool or type_argument is String:
-            raise MHscr_TypeError(f"Type {type_argument} cannot be used in a divising operation.")
-        elif T is Float or type_argument is Float:
-            return Float(left.value / right.value)
-        elif T is Int and T is type_argument:
-            return Int(left.value / right.value)
-        else:
-            raise MHscr_ValueError(f"Unsupported operation: {left} {T} / {right} {type_argument}")
+        try:
+            
+            if T is Bool or T is String:
+                raise MHscr_TypeError(f"Type {T} cannot be used in a divising operation.")
+            elif type_argument is Bool or type_argument is String:
+                raise MHscr_TypeError(f"Type {type_argument} cannot be used in a divising operation.")
+            elif T is Float or type_argument is Float:
+                return Float(left.value / right.value)
+            elif T is Int and T is type_argument:
+                return Int(left.value / right.value)
+            else:
+                raise MHscr_ValueError(f"Unsupported operation: {left} {T} / {right} {type_argument}")
+        except ZeroDivisionError:
+            raise MHscr_ValueError("Cannot divide by zero.")
     
     def LogicalAnd(left: String | Int | Float | Bool, right: String | Int | Float | Bool) -> Bool:
         try:

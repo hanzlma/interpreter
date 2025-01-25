@@ -1,7 +1,8 @@
 class MHscr_Error(Exception):
-    def __init__(self, message:str = "Unknown Error", line:int = None) -> None:
+    def __init__(self, message:str = "Unknown Error", /, *, line:int = None, command:str=None) -> None:
         self.message = message
         self.line = line
+        self.command = command
         super().__init__(message)
     def __str__(self) -> str:
         return self.message
