@@ -1,5 +1,5 @@
-from Expressions.expressions import Expression, PrepareValue
-from operators import SplitByOperators
+from .expressions import Expression, PrepareValue
+from mhscr_interpreter.operators import SplitByOperators
 
 
 class PrintExp(Expression):

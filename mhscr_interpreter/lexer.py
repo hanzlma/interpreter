@@ -1,4 +1,4 @@
-from errors import MHscr_KeywordError
+from mhscr_interpreter.errors import MHscr_KeywordError
 class Lexer:
     """
     Lexer class of MHscript interpreter.
@@ -6,14 +6,14 @@ class Lexer:
     cli: bool
     lexFunction: str
     def __init__(self, runner) -> None:
-        from runner_cli import CLIRunner
+        from .runner_cli import CLIRunner
         self.cli = True if isinstance(runner, CLIRunner) else False #doplnit WholeFile typem
         self.lexFunction = "Lex_CLI" if self.cli else "Lex_Wholefile"
         self.runner = runner
 
-    from Expressions.variable import VariableExp, VariableAssignmentExp, ConstantVariableExp
-    from Expressions.print import PrintExp
-    from Expressions.input import InputExp
+    from mhscr_interpreter.Expressions.variable import VariableExp, VariableAssignmentExp, ConstantVariableExp
+    from mhscr_interpreter.Expressions.print import PrintExp
+    from mhscr_interpreter.Expressions.input import InputExp
 
     def Lex(self, script: str | list[str]) -> PrintExp | VariableExp | ConstantVariableExp | VariableAssignmentExp | InputExp | list[PrintExp | VariableExp | ConstantVariableExp | VariableAssignmentExp | InputExp]:
         return getattr(self, self.lexFunction)(script)
@@ -31,8 +31,8 @@ class Lexer:
                 expressions.append(self.runner.keywords.GetExpression(command=line.split(' ')[0]))
             except MHscr_KeywordError as err:
                 raise MHscr_KeywordError(err.message, command=line)
-            from Expressions.variable import VariableExp, VariableAssignmentExp
-            from Expressions.function import FunctionDefinitionExpression, FunctionCallExpression
+            from .Expressions.variable import VariableExp, VariableAssignmentExp
+            from .Expressions.function import FunctionDefinitionExpression, FunctionCallExpression
             
             if expressions[-1] is VariableExp:
                 self.runner.keywords.dictionary[line.split(' ')[1]] = VariableAssignmentExp

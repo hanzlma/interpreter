@@ -1,5 +1,5 @@
-from datatypes import String, Int, Float, Bool, Let
-from errors import MHscr_TypeError
+from mhscr_interpreter.datatypes import String, Int, Float, Bool, Let
+from mhscr_interpreter.errors import MHscr_TypeError
 class Variable:
     name: str
     datatype: type

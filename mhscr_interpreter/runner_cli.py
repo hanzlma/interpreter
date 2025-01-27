@@ -1,7 +1,7 @@
-from lexer import Lexer
-from errors import MHscr_Error
-from variable import Variable
-from keywords import KeywordsDict
+from mhscr_interpreter.lexer import Lexer
+from mhscr_interpreter.errors import MHscr_Error
+from mhscr_interpreter.variable import Variable
+from mhscr_interpreter.keywords import KeywordsDict
 class CLIRunner:
     """Runner class for in-CLI interpreter."""
     variables: dict[str, Variable] = dict[str, Variable]()

@@ -1,7 +1,7 @@
 from .expressions import Expression, PrepareValue
-from operators import SplitByOperators
-from datatypes import Bool
-from errors import MHscr_SyntaxError
+from mhscr_interpreter.operators import SplitByOperators
+from mhscr_interpreter.datatypes import Bool
+from mhscr_interpreter.errors import MHscr_SyntaxError
 from .variable import VariableExp, VariableAssignmentExp
 class IfExpression(Expression):
 

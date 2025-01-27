@@ -1,9 +1,9 @@
 import re
 
 from .expressions import Expression
-from datatypes import String, Let, GetDatatypeDynamically
-from errors import MHscr_TypeError, MHscr_ValueError
-from variable import Variable
+from mhscr_interpreter.datatypes import String, Let, GetDatatypeDynamically
+from mhscr_interpreter.errors import MHscr_TypeError, MHscr_ValueError
+from mhscr_interpreter.variable import Variable
 
 class InputExp(Expression):
     """

@@ -1,3 +1,5 @@
 example.txt
+/mhscr_interpreter/__pycache__
+/mhscr_interpreter/Expressions/__pycache__
 /__pycache__
-/Expressions/__pycache__
+/mhscr_interpreter.egg-info

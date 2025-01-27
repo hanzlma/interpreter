@@ -1,7 +1,7 @@
 from .expressions import Expression
-from errors import MHscr_RuntimeError, MHscr_SyntaxError
-from function import Function
-from variable import Variable
+from mhscr_interpreter.errors import MHscr_RuntimeError, MHscr_SyntaxError
+from mhscr_interpreter.function import Function
+from mhscr_interpreter.variable import Variable
 class FunctionDefinitionExpression(Expression):
     
     arguments: list[str]

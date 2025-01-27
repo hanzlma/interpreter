@@ -1,8 +1,8 @@
 from .expressions import Expression, PrepareValue
-from datatypes import String, Int, Float, Bool, Let
-from errors import MHscr_KeywordError, MHscr_OperatorError, MHscr_TypeError, MHscr_ValueError
-from variable import Variable
-from operators import SplitByOperators
+from mhscr_interpreter.datatypes import String, Int, Float, Bool, Let
+from mhscr_interpreter.errors import MHscr_KeywordError, MHscr_OperatorError, MHscr_TypeError, MHscr_ValueError
+from mhscr_interpreter.variable import Variable
+from mhscr_interpreter.operators import SplitByOperators
 class VariableExp(Expression):
     """
     

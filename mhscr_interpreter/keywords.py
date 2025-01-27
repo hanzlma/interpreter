@@ -1,13 +1,13 @@
-from errors import MHscr_KeywordError
+from mhscr_interpreter.errors import MHscr_KeywordError
 class KeywordsDict:
     """
     Translates keyword into class reference.
     """
-    from Expressions.branchingAndCycles import IfExpression, EndIfExpression, WhileExpression, EndWhileExpression, ForExpression, EndForExpression
-    from Expressions.variable import VariableExp, VariableAssignmentExp, ConstantVariableExp
-    from Expressions.print import PrintExp
-    from Expressions.input import InputExp
-    from Expressions.function import FunctionDefinitionExpression, EndFunctionDefinitionExpression
+    from .Expressions.branchingAndCycles import IfExpression, EndIfExpression, WhileExpression, EndWhileExpression, ForExpression, EndForExpression
+    from .Expressions.variable import VariableExp, VariableAssignmentExp, ConstantVariableExp
+    from .Expressions.print import PrintExp
+    from .Expressions.input import InputExp
+    from .Expressions.function import FunctionDefinitionExpression, EndFunctionDefinitionExpression
     dictionary: dict[str, ] = {
     
         'print': PrintExp,

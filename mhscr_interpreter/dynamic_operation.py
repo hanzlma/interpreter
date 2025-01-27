@@ -1,16 +1,16 @@
 import re
 
-from datatypes import String, Int, Float, Bool, Let
+from mhscr_interpreter.datatypes import String, Int, Float, Bool, Let
 
-from errors import MHscr_ValueError, MHscr_TypeError, MHscr_OperatorError
-from operators import operators
-from helper import DynamicListContainsDatatype
+from mhscr_interpreter.errors import MHscr_ValueError, MHscr_TypeError, MHscr_OperatorError
+from mhscr_interpreter.operators import operators
+from mhscr_interpreter.helper import DynamicListContainsDatatype
 
 class DynamicCalculator:
     """Dynamic Calculator static class"""
 
     def CalculateDynamicOperations(arguments: list[String | Int | Float | Bool | Let], ops: list[str], _recursive: bool = False) -> String | Int | Float | Bool:
-        from datatypes import GetDatatypeDynamically
+        from .datatypes import GetDatatypeDynamically
         for i in range(len(arguments)):
             arguments[i] = GetDatatypeDynamically(str(arguments[i])) if isinstance(arguments[i], Let) else arguments[i]
         if isinstance(arguments[0], String) and (ops.count(operators['minus']) > 0 or ops.count(operators['multiply']) > 0 or ops.count(operators['divide']) > 0 ):

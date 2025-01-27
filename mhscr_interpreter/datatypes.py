@@ -1,4 +1,4 @@
-from errors import MHscr_ValueError
+from mhscr_interpreter.errors import MHscr_ValueError
 
 class String:
     """

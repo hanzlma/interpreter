@@ -1,8 +1,8 @@
-from lexer import Lexer
-from errors import MHscr_Error
-from variable import Variable
-from keywords import KeywordsDict
-from function import Function
+from mhscr_interpreter.lexer import Lexer
+from mhscr_interpreter.errors import MHscr_Error
+from mhscr_interpreter.variable import Variable
+from mhscr_interpreter.keywords import KeywordsDict
+from mhscr_interpreter.function import Function
 
 class WholefileRunner:
     """Runner class for wholefile interpreter."""

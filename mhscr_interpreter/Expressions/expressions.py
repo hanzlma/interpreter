@@ -1,6 +1,6 @@
-from operators import GetOperatorsFromText
-from datatypes import GetDatatypeDynamically
-from dynamic_operation import DynamicCalculator
+from mhscr_interpreter.operators import GetOperatorsFromText
+from mhscr_interpreter.datatypes import GetDatatypeDynamically
+from mhscr_interpreter.dynamic_operation import DynamicCalculator
 
 def PrepareValue(runner, argument: str, arguments: list[str]):
     if len(arguments) == 1:
