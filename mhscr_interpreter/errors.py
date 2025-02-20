@@ -30,3 +30,10 @@ class MHscr_SyntaxError(MHscr_Error):
 
 class MHscr_RuntimeError(MHscr_Error):
     pass
+
+def getErrorLine(runner, expression) -> int | None:
+    try:
+        return runner.source_expressions.index(expression)
+    finally:
+        return None
+        

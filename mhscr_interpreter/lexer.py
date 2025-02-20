@@ -7,7 +7,7 @@ class Lexer:
     lexFunction: str
     def __init__(self, runner) -> None:
         from .runner_cli import CLIRunner
-        self.cli = True if isinstance(runner, CLIRunner) else False #doplnit WholeFile typem
+        self.cli = True if isinstance(runner, CLIRunner) else False
         self.lexFunction = "Lex_CLI" if self.cli else "Lex_Wholefile"
         self.runner = runner
 
@@ -17,10 +17,9 @@ class Lexer:
 
     def Lex(self, script: str | list[str]) -> PrintExp | VariableExp | ConstantVariableExp | VariableAssignmentExp | InputExp | list[PrintExp | VariableExp | ConstantVariableExp | VariableAssignmentExp | InputExp]:
         return getattr(self, self.lexFunction)(script)
-    
+
     def Lex_CLI(self, line: str) -> PrintExp | VariableExp | ConstantVariableExp | VariableAssignmentExp | InputExp:
         command = line.split(' ')[0]
-        
         expression = self.runner.keywords.GetExpression(command=command)
         return expression
     

@@ -1,10 +1,10 @@
 from .expressions import Expression, PrepareValue
-from mhscr_interpreter.operators import SplitByOperators
-from mhscr_interpreter.datatypes import Bool
-from mhscr_interpreter.errors import MHscr_SyntaxError
+from mhscr_interpreter.operators import SplitByOperators, GetOperatorsFromText, LogicalOperatorCheck
+from mhscr_interpreter.datatypes import Bool, Int, Float
+from mhscr_interpreter.errors import MHscr_SyntaxError, MHscr_Error, MHscr_TypeError, MHscr_OperatorError
 from .variable import VariableExp, VariableAssignmentExp
 class IfExpression(Expression):
-
+    """Implementation of IF expression."""
     inp: str
     argument: str
     arguments: list[str]
@@ -16,7 +16,8 @@ class IfExpression(Expression):
         self.firstCall = True
         self.prepareArguments()
 
-    def execute(self, functionCall=False) -> None:
+    def execute(self, /, *, functionCall=False) -> None:
+        super().execute(functionCall=functionCall)
         
         value = Bool(PrepareValue(self.runner, self.argument, self.arguments).value).value
         runner = functionCall if functionCall else self.runner
@@ -28,7 +29,7 @@ class IfExpression(Expression):
 
         if value:
             for exp in self.expressions:
-                exp.execute(functionCall)
+                exp.execute(functionCall=functionCall)
         
 
     def prepareArguments(self) -> None:
@@ -91,10 +92,11 @@ class IfExpression(Expression):
                     continue
                 runner.expressions.remove(expression)
 class EndIfExpression(Expression):
+    """Expression symbolizing the end of an IF expression block."""
     pass
 
 class WhileExpression(Expression):
-
+    """Implementation of WHILE expression."""
     inp: str
     argument: str
     arguments: list[str]
@@ -106,7 +108,8 @@ class WhileExpression(Expression):
         self.expressions = []
         self.prepareArguments()
 
-    def execute(self, functionCall=False) -> None:
+    def execute(self, /, *, functionCall=False) -> None:
+        super().execute(functionCall=functionCall)
         value = Bool(PrepareValue(self.runner, self.argument, self.arguments).value).value
         runner = functionCall if functionCall else self.runner
         if self.firstCall:
@@ -162,11 +165,12 @@ class WhileExpression(Expression):
                 runner.expressions.remove(expression)
 
 class EndWhileExpression(Expression):
+    """Expression symbolizing the end of WHILE expression block."""
     pass
 
 
 class ForExpression(Expression):
-
+    """Implementation of FOR LOOP expression."""
     inp: str
     argument: list[str] #0 - declaration; 1 logical statement; 2 iteration;
     expressions: list
@@ -174,7 +178,8 @@ class ForExpression(Expression):
     arguments_if: list[str]
     iteration: VariableAssignmentExp
     declared_varname: str
-
+    bool_value: bool
+    
     def __init__(self, runner, inp: str, cli: bool) -> None:
         super().__init__(runner, inp, cli)
         self.firstCall = True
@@ -182,14 +187,27 @@ class ForExpression(Expression):
         self.prepareArguments()
 
     def prepareArguments(self) -> None:
-        self.argument = [arg.strip() for arg in self.inp.replace('for ', '').split(';')]
+        try:
+            self.argument = [arg.strip() for arg in self.inp.replace('for ', '').split(';')]
+            try:
+                self.declaration = VariableExp(self.runner, self.argument[0], False)
+                if self.declaration.datatype is not Int and self.declaration.datatype is not Float:
+                    raise MHscr_TypeError(f"Type {self.declaration.datatype} cannot be iterated.")
+                
+                if not LogicalOperatorCheck(GetOperatorsFromText(self.argument[1])):
+                    raise MHscr_OperatorError("Wrong operators for logical statement")
+                self.arguments_if = SplitByOperators(self.argument[1])
+                
+                
+                self.iteration = VariableAssignmentExp(self.runner, self.argument[2], False)
+            except MHscr_Error as err:
+                raise type(err)(err.message, command=self.inp)
+            self.declared_varname = self.declaration.name
+        except IndexError:
+            raise MHscr_SyntaxError(f"Wrong arguments for expression {type(self)}", command=self.inp)
         
-        self.declaration = VariableExp(self.runner, self.argument[0], False)
-        self.arguments_if = SplitByOperators(self.argument[1])
-        self.iteration = VariableAssignmentExp(self.runner, self.argument[2], False)
-        self.declared_varname = self.declaration.name
-        
-    def execute(self, functionCall=False) -> None:
+    def execute(self, /, *, functionCall=False) -> None:
+        super().execute(functionCall=functionCall)
         runner = functionCall if functionCall else self.runner
         if self.firstCall:
             self.firstCall = False
@@ -197,13 +215,13 @@ class ForExpression(Expression):
         
         self.declaration.execute()
         
-        value = Bool(PrepareValue(self.runner, self.argument[1], self.arguments_if).value).value
+        self.bool_value = Bool(PrepareValue(self.runner, self.argument[1], self.arguments_if).value).value
         
-        while value:
+        while self.bool_value:
             for expression in self.expressions:
                 expression.execute()
             self.iteration.execute()
-            value = Bool(PrepareValue(self.runner, self.argument[1], self.arguments_if).value).value
+            self.bool_value = Bool(PrepareValue(self.runner, self.argument[1], self.arguments_if).value).value
 
         self.runner.variables.pop(self.declared_varname)
 
@@ -249,4 +267,5 @@ class ForExpression(Expression):
 
 
 class EndForExpression(Expression):
+    """Expression symbolizing the end of FOR LOOP expression block."""
     pass

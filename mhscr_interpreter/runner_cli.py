@@ -19,11 +19,12 @@ class CLIRunner:
         try:
             inp = input('> ')
             while inp != 'exit':
-                try:
-                    expression = self.lexer.Lex(inp)(self, inp, True)
-                    expression.execute()
-                except MHscr_Error as err:
-                    print(f'> Code "{inp}" could not have been execture because of a {err.get_name()}!\nError: {err}')
+                if inp != "":
+                    try:
+                        expression = self.lexer.Lex(inp)(self, inp, True)
+                        expression.execute()
+                    except MHscr_Error as err:
+                        print(f'> Code "{inp}" could not have been executed because of a {err.get_name()}!\nError: {err}')
                 inp = input('> ')
         except KeyboardInterrupt:
             pass

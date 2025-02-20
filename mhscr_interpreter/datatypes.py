@@ -14,8 +14,9 @@ class String:
     def __init__(self, val: str | int | float) -> None:
         if isinstance(val, (int, float)):
             self.value = str(val)
-        elif val[0] == val[-1] and (val[0] == '"' or val[0] == "'"):
+        elif val[0] == val[-1] and (val[0] == '"' or val[0] == "'") and len(val) > 1:
             self.value = val.replace(val[0], '')
+            
         else:
             raise MHscr_ValueError(f"Value {val} cannot be converted to string")
 
@@ -109,4 +110,8 @@ def GetDatatypeDynamically(runner, val:str) -> String | Int | Bool | Float:
         return Int(val)
     except (MHscr_ValueError , ValueError):
         pass
-    return Bool(val, _dynamically_called=True)
+    try: 
+        return Bool(val, _dynamically_called=True)
+    except (MHscr_ValueError):
+        raise MHscr_ValueError("Unknown value: " + (("'" + val + "'") if val[0] == '"' or val[-1] == '"' else ('"' + val + '"')))
+

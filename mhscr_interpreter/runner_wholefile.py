@@ -28,10 +28,13 @@ class WholefileRunner:
         try:
             file = open(self.filepath)
             lines = file.readlines()
+        except FileNotFoundError:
+            print(f"File not found \"{self.filepath}\"")
+            return
         except Exception as Err:
             print(Err)
-        finally:
-            file.close()
+            return
+        file.close()
         
         for i in range(len(lines)):
             lines[i] = lines[i].replace('\n', '')
@@ -49,7 +52,6 @@ class WholefileRunner:
             exit()
 
         self.source_expressions = self.expressions.copy()
-            
 
         for expression in self.expressions:
             try: 

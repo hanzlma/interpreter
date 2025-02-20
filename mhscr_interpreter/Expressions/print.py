@@ -25,6 +25,7 @@ class PrintExp(Expression):
         self.argument = self.inp.replace('print ', '')
         self.arguments = SplitByOperators(self.argument)
             
-    def execute(self, functionCall=False) -> None:
+    def execute(self, /, *, functionCall=False) -> None:
+        super().execute(functionCall=functionCall)
         self.printvalue = str(PrepareValue(self.runner, self.argument, self.arguments))
         print(f"{'> ' if self.cli else ''}{self.printvalue}")

@@ -2,8 +2,15 @@ from .expressions import Expression
 from mhscr_interpreter.errors import MHscr_RuntimeError, MHscr_SyntaxError
 from mhscr_interpreter.function import Function
 from mhscr_interpreter.variable import Variable
+from mhscr_interpreter.datatypes import GetDatatypeDynamically
 class FunctionDefinitionExpression(Expression):
+    """
+    Implementation of a function definition expression.
+    This expression starts a function block, meaning all following expressions until
+    EndFunctionDefinitionExpression belong to this function.
     
+    ALL FUNCTION PARAMETRES ARE READ-ONLY!
+    """
     arguments: list[str]
     defined_arguments: list[tuple] = []
     expressions: list = []
@@ -24,8 +31,7 @@ class FunctionDefinitionExpression(Expression):
             name = argument.split(' ')[1]
             self.defined_arguments.append((datatype, name))
             self.runner.keywords.dictionary[name] = VariableAssignmentExp
-        #self.runner.keywords.dictionary[self.name] = FunctionCallExpression
-        #print(self.defined_arguments)
+
         
     def getExpressions(self) -> None:
         index = self.runner.source_expressions.index(self)
@@ -40,7 +46,10 @@ class FunctionDefinitionExpression(Expression):
             self.runner.expressions.remove(expression)
         
     
-    def execute(self) -> None:
+    def execute(self, /, *, functionCall=False) -> None:
+        super().execute(functionCall=functionCall)
+        if functionCall:
+            raise MHscr_RuntimeError("Cannot define a function inside a function", line=self.runner.source_expressions.index(self))
         self.getExpressions()
         
         if any([fn.name == self.name for fn in self.runner.functions]):
@@ -52,8 +61,10 @@ class FunctionDefinitionExpression(Expression):
         
 
 class EndFunctionDefinitionExpression(Expression):
+    """Expression symbolizing the end of the function definition block."""
     pass
 class FunctionCallExpression(Expression):
+    """Expression which calls a previously defined function."""
     
     name: str
     arguments: list[str]
@@ -64,7 +75,8 @@ class FunctionCallExpression(Expression):
         self.name = self.inp.split(' ')[0]
         self.arguments = [arg.strip() for arg in self.inp.replace(self.name, '').split(',')]
     
-    def execute(self) -> None:
+    def execute(self, /, *, functionCall=False) -> None:
+        super().execute(functionCall=functionCall)
         for fn in self.runner.functions:
             if fn.name == self.name:
                 self.function = fn
@@ -75,8 +87,8 @@ class FunctionCallExpression(Expression):
             (datatype, name) = self.function.arguments[i]
             if name in self.runner.variables.keys():
                 raise MHscr_RuntimeError(f"Variable {name} already initialized.", line=self.runner.source_expressions.index(self))
-            self.runner.variables[name] = Variable(name, datatype, datatype(self.arguments[i]), local=True)
-            
+            self.runner.variables[name] = Variable(name, datatype, GetDatatypeDynamically(self.runner,self.arguments[i]), local=True)
+        
         for expression in self.function.expressions:
             expression.execute(functionCall=next(f for f in self.runner.functions if f == self.function))
             

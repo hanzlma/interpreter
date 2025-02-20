@@ -15,8 +15,8 @@ operators = {
 }
 
 def SplitByOperators(string: str) -> list[str]:
-    split1: list[str] = re.split(r'(?<=\s)(\+|\-|\*|\/|&&|\|\||==|!=|>|<|>=|<=)(?=\s)', string)
-    return [part.strip() for part in split1 if not re.match(r'^(\+|\-|\*|\/|&&|\|\||==|!=|>|<|>=|<=)$', part.strip())]
+    split: list[str] = re.split(r'(?<=\s)(\+|\-|\*|\/|&&|\|\||==|!=|>|<|>=|<=)(?=\s)', string)
+    return [part.strip() for part in split if not re.match(r'^(\+|\-|\*|\/|&&|\|\||==|!=|>|<|>=|<=)$', part.strip())]
 
 def GetOperatorsFromText(string: str) -> list[str]:
     operatorOccurencies: dict[int, str] = {}
@@ -26,4 +26,10 @@ def GetOperatorsFromText(string: str) -> list[str]:
     output: list[str] = []
     for occurency in list(operatorOccurencies.values()):
         output.append(occurency.strip())
+    return output
+
+def LogicalOperatorCheck(strings: list[str]) -> bool:
+    output = False
+    for string in strings:
+        output = True if re.match(r'(&&|\|\||==|!=|>|<|>=|<=)', string) is not None else output
     return output

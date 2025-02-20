@@ -34,7 +34,7 @@ class KeywordsDict:
         if not cli:
             self.dictionary.update(self.wholefileOnlyDictionary)
        
-    def GetExpression(self, command) -> PrintExp:
+    def GetExpression(self, command):
         try:
             return self.dictionary[command]
         except KeyError as err:
