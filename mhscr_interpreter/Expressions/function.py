@@ -1,8 +1,9 @@
-from .expressions import Expression
+from .expressions import Expression, PrepareValue
 from mhscr_interpreter.errors import MHscr_RuntimeError, MHscr_SyntaxError
 from mhscr_interpreter.function import Function
 from mhscr_interpreter.variable import Variable
 from mhscr_interpreter.datatypes import GetDatatypeDynamically
+from mhscr_interpreter.operators import SplitByOperators
 class FunctionDefinitionExpression(Expression):
     """
     Implementation of a function definition expression.
@@ -25,8 +26,9 @@ class FunctionDefinitionExpression(Expression):
         self.arguments = [arg.strip() for arg in self.inp.replace(f"fn {self.name}", '').split(',')]
 
         from .variable import VariableExp, VariableAssignmentExp
-        
         for argument in self.arguments:
+            if argument == '':
+                continue
             datatype = VariableExp.GetDatatype(self.runner, self, argument.split(' ')[0])
             name = argument.split(' ')[1]
             self.defined_arguments.append((datatype, name))
@@ -74,6 +76,7 @@ class FunctionCallExpression(Expression):
         super().__init__(runner, inp, cli)
         self.name = self.inp.split(' ')[0]
         self.arguments = [arg.strip() for arg in self.inp.replace(self.name, '').split(',')]
+        self.returnValue = None
     
     def execute(self, /, *, functionCall=False) -> None:
         super().execute(functionCall=functionCall)
@@ -83,6 +86,7 @@ class FunctionCallExpression(Expression):
                 break
         if not self.function:
             raise MHscr_RuntimeError("Function does not exist.", line=self.runner.source_expressions.index(self))
+        self.function.returnValue = None
         for i in range(len(self.function.arguments)):
             (datatype, name) = self.function.arguments[i]
             if name in self.runner.variables.keys():
@@ -102,5 +106,24 @@ class FunctionCallExpression(Expression):
                 self.runner.keywords.dictionary.pop(name)
         for name in names:
             self.runner.variables.pop(name)
+            
+        return self.function.returnValue
+        
+class ReturnExpression(Expression):
+    """Expression returning a value from a function."""
+    
+    arguments: list | None
+    
+    def __init__(self, runner, inp, cli):
+        super().__init__(runner, inp, cli)
+        self.arguments = SplitByOperators(self.inp.replace('return ', '')) if self.inp.replace('return', '') != '' else None
+        
+    def execute(self, /, *, functionCall=False):
+        super().execute(functionCall=functionCall)
+        if functionCall is False:
+            raise MHscr_SyntaxError("Return cannot be located outside of a function block.")
+        
+        functionCall.returnValue = PrepareValue(self.runner, self.inp.replace('return ', ''), self.arguments) if self.arguments is not None else None
+        
         
         

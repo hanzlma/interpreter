@@ -9,3 +9,4 @@ class Function:
         self.arguments = arguments
         self.expressions = expressions
         self.source_expressions = expressions
+        self.returnValue = None
