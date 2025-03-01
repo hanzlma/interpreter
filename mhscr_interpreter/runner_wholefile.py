@@ -42,14 +42,14 @@ class WholefileRunner:
             commands = self.lexer.Lex(lines)
         except MHscr_Error as err:
             print(f"Program encountered an exception: line {lines.index(err.command)}, {err.get_name()}: {err.message}")
-            exit()
+            return
             
         try:
             self.expressions = [commands[i](runner=self, inp=lines[i], cli=False) for i in range(len(commands))]
 
         except MHscr_Error as err:
             print(f"Program encountered an exception: line {err.line if err.line else lines.index(err.command)}, {err.get_name()}: {err.message}")
-            exit()
+            return
 
         self.source_expressions = self.expressions.copy()
 
@@ -58,6 +58,6 @@ class WholefileRunner:
                 expression.execute()
             except MHscr_Error as err:
                 print(f"Program encountered an exception: line {err.line if err.line else self.expressions.index(expression)}, {err.get_name()}: {err.message}")
-                exit()
+                return
         
     

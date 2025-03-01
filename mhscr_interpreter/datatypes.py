@@ -98,13 +98,15 @@ class Let:
 def GetDatatypeDynamically(runner, val:str) -> String | Int | Bool | Float:
     if val in runner.variables:
         return runner.variables[val].var
-    func = next((f for f in runner.functions if f.name == val.split(' ')[0]), None)
-    if func is not None:
-        from mhscr_interpreter.Expressions.function import FunctionCallExpression
-        returnValue = FunctionCallExpression(runner, val, False).execute()
-        if returnValue is None:
-            raise MHscr_ValueError("Cannot assign null value to a variable")
-        return returnValue
+    from mhscr_interpreter.runner_wholefile import WholefileRunner
+    if isinstance(runner, WholefileRunner):
+        func = next((f for f in runner.functions if f.name == val.split(' ')[0]), None)
+        if func is not None:
+            from mhscr_interpreter.Expressions.function import FunctionCallExpression
+            returnValue = FunctionCallExpression(runner, val, False).execute()
+            if returnValue is None:
+                raise MHscr_ValueError("Cannot assign null value to a variable")
+            return returnValue
     try:
         return String(val)
     except (MHscr_ValueError , ValueError , IndexError):

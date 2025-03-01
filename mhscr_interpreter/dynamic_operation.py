@@ -50,11 +50,11 @@ class DynamicCalculator:
         return (args, op)
 
     def ResolveLogicalOperatorPrecedences(arguments: list[String | Int | Float | Bool], ops: list[str]) -> tuple[list[String | Int | Float | Bool] , list[str]]:
-        if len(re.findall('\|\||&&', str(ops))) < 1:
+        if len(re.findall(r'\|\||&&', str(ops))) < 1:
             return (arguments, ops)
         logicalOperators: list[tuple[int, str]] = []
         for i in range(0, len(arguments) - 1):
-            if re.search('^\|\||&&$', ops[i]):
+            if re.search(r'^\|\||&&$', ops[i]):
                 logicalOperators.append((i, ops[i]))
         outputArguments: list[String | Int | Float | Bool] = []
         outputOperators: list[str] = []
