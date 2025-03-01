@@ -11,20 +11,22 @@ class PrintExp(Expression):
         print "Hello world"
 
     """
+
     cli: bool
     inp: str
     argument: str
     arguments: list
     printvalue: str
+
     def __init__(self, runner, inp: str, cli: bool) -> None:
         super().__init__(runner, inp, cli)
-        
+
         self.prepareArguments()
-    
+
     def prepareArguments(self) -> None:
-        self.argument = self.inp.replace('print ', '')
+        self.argument = self.inp.replace("print ", "")
         self.arguments = SplitByOperators(self.argument)
-            
+
     def execute(self, /, *, functionCall=False) -> None:
         super().execute(functionCall=functionCall)
         self.printvalue = str(PrepareValue(self.runner, self.argument, self.arguments))

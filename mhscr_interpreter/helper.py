@@ -4,5 +4,6 @@ def DynamicListContainsDatatype(arr: list, t: type):
             return True
     return False
 
+
 def getLineNumberFromExpression(expression, runner):
     return runner.source_expressions.index(expression)

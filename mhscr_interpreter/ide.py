@@ -7,35 +7,41 @@ import io
 import sys
 
 from mhscr_interpreter.main import IDE_Run
+
 root = tk.Tk()
 root.title("mhscr IDE")
 
-frame = tk.Frame(root, bg='light blue')
-frame.pack(fill='both', expand=True)
+frame = tk.Frame(root, bg="light blue")
+frame.pack(fill="both", expand=True)
 
 text_area = tk.Text(frame, width=80, height=20)
-text_area.pack(fill='both', expand=True)
+text_area.pack(fill="both", expand=True)
+
 
 def saveFile():
     filename = tkinter.filedialog.asksaveasfilename(title="Save file")
     if filename:
-        with open(filename, 'w') as f:
+        with open(filename, "w") as f:
             script_content = text_area.get(1.0, tk.END)
             if script_content:
                 f.write(script_content)
 
+
 def openFile():
-    filename = tkinter.filedialog.askopenfilename(title="Open file", filetypes=[("Text documents", "*.txt")])
+    filename = tkinter.filedialog.askopenfilename(
+        title="Open file", filetypes=[("Text documents", "*.txt")]
+    )
     if filename:
-        with open(filename, 'r') as file:
+        with open(filename, "r") as file:
             content = file.read()
         text_area.delete(1.0, tk.END)
         text_area.insert(tk.INSERT, content)
 
+
 def runScript():
     script_content = text_area.get(1.0, tk.END)
     if script_content:
-        with open('temp.txt', 'w') as f:
+        with open("temp.txt", "w") as f:
             f.write(script_content)
         captured_output = io.StringIO()
         sys.stdout = captured_output
@@ -43,25 +49,30 @@ def runScript():
         sys.stdout = sys.__stdout__
         output = captured_output.getvalue()
         tk.messagebox.showinfo("Result", f"Script result:\n{output}")
-        os.remove('temp.txt')
+        os.remove("temp.txt")
     else:
         tk.messagebox.showerror("Error", "No script to run.")
+
 
 def cut():
     text_area.select_range(0, tk.END)
     text_area.delete(1.0, tk.END)
 
+
 def copy():
     text_area.select_range(0, tk.END)
     text_area.event_generate("<<Copy>>")
+
 
 def paste():
     clipboard_text = tkinter.simpledialog.askstring("Paste", "Enter pasted text:")
     if clipboard_text:
         text_area.insert(tk.CURSEL, clipboard_text)
+
+
 # Run Button
 run_button = tk.Button(frame, text="Run", command=runScript)
-run_button.pack(side='bottom')
+run_button.pack(side="bottom")
 
 # Menu Bar
 menu = tk.Menu(root)
