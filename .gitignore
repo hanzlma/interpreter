@@ -3,3 +3,4 @@ example.txt
 /mhscr_interpreter/Expressions/__pycache__
 /__pycache__
 /mhscr_interpreter.egg-info
+/mhscr_interpreter/.DS_Store
